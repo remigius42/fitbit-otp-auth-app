@@ -6,6 +6,7 @@ import type {
 } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
 import { currentPeriod, totp } from "./totp"
+import { log } from "./debug_log"
 
 type TokenManagerObserver = (
   tokenManager: TokenManager,
@@ -71,6 +72,7 @@ export class TokenManager {
 
   tryRestoreFromDevice() {
     if (fs.existsSync(TokenManager.TOKENS_CBOR_PATH)) {
+      log("token file exists")
       const restoredTokens = fs.readFileSync(
         TokenManager.TOKENS_CBOR_PATH,
         "cbor"
@@ -78,6 +80,9 @@ export class TokenManager {
       this.tokens.length = 0
       restoredTokens.forEach(token => this.tokens.push(token))
       this.notifyObservers()
+      log(`notified observers, ${this.tokens.length} token(s) restored`)
+    } else {
+      log("token file is missing.")
     }
   }
 

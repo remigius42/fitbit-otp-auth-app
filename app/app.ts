@@ -1,6 +1,7 @@
 import type { MessageEvent } from "messaging"
 import { peerSocket } from "messaging"
 import { PeerMessage } from "../common/PeerMessage"
+import { log, outputLog } from "./debug_log"
 import { SettingsManager } from "./SettingsManager"
 import { TokenManager } from "./TokenManager"
 import { registerDelayedMessageWhetherDeviceIsConnected, updateUi } from "./ui"
@@ -11,6 +12,7 @@ const tokenManager = new TokenManager()
 const settingsManager = new SettingsManager()
 
 export function initialize() {
+  log("App started...")
   registerPeerSocketListener()
   registerDelayedMessageWhetherDeviceIsConnected()
   settingsManager.registerObserver(
@@ -28,6 +30,7 @@ export function initialize() {
     }
   })
   tokenManager.tryRestoreFromDevice()
+  log("Startup complete.")
 }
 
 function registerPeerSocketListener() {
@@ -41,6 +44,7 @@ function registerPeerSocketListener() {
         break
       case "UPDATE_SETTINGS_MESSAGE":
         settingsManager.updateSettings(message)
+        outputLog()
         break
       /* istanbul ignore next: this is only the compile time exhaustiveness check (see https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking) */
       default:
