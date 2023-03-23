@@ -57,7 +57,8 @@
     "check-licenses": "license-checker-rseidelsohn --production --onlyAllow \"MIT;ISC;BSD-3-Clause;Apache-2.0;0BSD\" --excludePrivatePackages",
     "prepare": "husky install",
     "generate-qr-tags": "node test/qr_codes/generateQrCodes.mjs",
-    "version": "conventional-changelog --preset conventionalcommits --infile CHANGELOG.md --same-file --append && prettier --write CHANGELOG.md && git add CHANGELOG.md"
+    "version": "conventional-changelog --preset conventionalcommits --infile CHANGELOG.md --same-file --append && prettier --write CHANGELOG.md && git add CHANGELOG.md",
+    "update-adr-index": "cd docs/architecture/decisions && adr generate toc -i .adr_README_intro.txt > README.md && npx prettier --write README.md"
   },
   "dependencies": {
     "@nuintun/qrcode": "3.3.0",

@@ -37,6 +37,7 @@ words:
   - gettext
   - msgid
   - msgstr
+  - nygard
   - otpauth
   - remigius
   - stylelint
