@@ -28,3 +28,18 @@ h6 {
 .bmc-btn {
   padding: 0px !important;
 }
+
+code.language-mermaid {
+  background-color: transparent;
+}
+pre:has(> code.language-mermaid) {
+  background-color: transparent;
+}
+/* This is a fallback for browsers not supporting `:has` where the background of the surrounding `pre` can't be cleared */
+code > svg[id^="mermaid-"] {
+  background-color: white;
+}
+/* Undo the fallback for browsers supporting `:has` */
+pre:has(> code.language-mermaid) > code > svg[id^="mermaid-"] {
+  background-color: transparent;
+}
