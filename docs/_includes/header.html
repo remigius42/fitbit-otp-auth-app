@@ -12,7 +12,14 @@
       >{{ site.title | escape }}</a
     >
 
-    {% comment %}
+    {%- if page.path contains "architecture/" %}
+    <span class="site-title" style="margin-left: 1em; margin-right: 1em"
+      >|</span
+    >
+    <a class="site-title" href="{{ '/architecture' | relative_url }}"
+      >Architecture documentation</a
+    >
+    {%- endif %} {% comment %}
     <!-- prettier-ignore -->
     {% endcomment %}
     {%- if page.collection -%}

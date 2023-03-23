@@ -1,6 +1,10 @@
 # Fitbit OTP Auth app documentation
 
 The documentation for the Fitbit OTP Auth app is built via GitHub pages.
+However, the [architecture
+documentation](https://remigius42.github.io/fitbit-tokens-tmp/architecture/) has
+been set up such that it can be read in the [GitHub
+repository](docs/architecture/README.md) directly as well.
 
 ## Preview GitHub pages locally
 

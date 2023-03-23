@@ -48,7 +48,15 @@ documentation</a>.
 
 Thanks for your interest in contributing! There are many ways to contribute to
 this project. Get started by having a look at
-[CONTRIBUTING.md](./CONTRIBUTING.md).
+[CONTRIBUTING.md](./CONTRIBUTING.md).  
+If you would like to know more about the technical aspects of this project,
+please have a look at the [architecture
+documentation](https://remigius42.github.io/fitbit-otp-auth-app/architecture/).
+Note that its [Mermaid](https://mermaid.js.org/) diagrams have been set up such
+that they should be rendered in the generated documentation as well as directly
+on the Markdown pages when browsing the repository. Since the generated
+documentation is built from the `main` branch, if you need older revisions, you
+could look at the [Markdown version](docs/architecture/README.md) directly.
 
 ## Funding
 
