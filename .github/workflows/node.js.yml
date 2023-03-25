@@ -1,4 +1,4 @@
-# spellchecker:ignore aquasecurity, htmlproofer, markdownlint, nvmrc, trivy, vuln
+# spellchecker:ignore aquasecurity, codacy, htmlproofer, lcov, markdownlint, nvmrc, trivy, vuln
 
 name: "Node.js CI"
 on:
@@ -33,6 +33,11 @@ jobs:
         run: npx eslint --max-warnings=0 .
       - name: Test
         run: npm run test:ci
+      - name: Upload coverage results to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage/lcov.info
       - name: Build
         run: npm run build
       - name: Upload build artifact for Git tags
