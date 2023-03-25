@@ -19,6 +19,7 @@ import { initialize } from "../app"
 import { SettingsManager } from "../SettingsManager"
 import { TokenManager } from "../TokenManager"
 import * as ui from "../ui"
+import * as colors from "../ui/colors"
 
 describe("app", () => {
   beforeAll(() => jest.useFakeTimers())
@@ -170,6 +171,30 @@ describe("app", () => {
       initialize()
 
       expect(restoreSettingsSpy).toBeCalled()
+    })
+
+    it("invokes function to update the UI colors", () => {
+      const updateColorsSpy = jest.spyOn(colors, "updateColors")
+
+      initialize()
+
+      expect(updateColorsSpy).toBeCalled()
+    })
+
+    it("invokes function to update the UI colors after having restored the settings", () => {
+      const observedCalls = []
+      const restoreSettings = "restoreSettings"
+      jest
+        .spyOn(SettingsManager.prototype, restoreSettings)
+        .mockImplementation(() => observedCalls.push(restoreSettings))
+      const updateColors = "updateColors"
+      jest
+        .spyOn(colors, updateColors)
+        .mockImplementation(() => observedCalls.push(updateColors))
+
+      initialize()
+
+      expect(observedCalls).toStrictEqual([restoreSettings, updateColors])
     })
 
     describe("registers an observer on the token manager which", () => {

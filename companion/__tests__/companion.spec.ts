@@ -8,6 +8,7 @@ import { messagingMockFactory } from "../__mocks__/messaging"
 jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
 import * as settings from "settings"
+import { ColorSchemeName } from "../../common/ColorSchemes"
 import type { TotpConfig } from "../../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../../settings/ui"
 import { initialize } from "../companion"
@@ -398,6 +399,23 @@ describe("companion", () => {
         expect(updateSettingsSpy).toBeCalledWith({
           shouldUseLargeTokenView: NEW_VALUE
         })
+      })
+
+      it("sends the settings update to the device if the color scheme setting is changed", () => {
+        const NEW_VALUE = ColorSchemeName.fb_aqua
+        const settingsStorageMock = setupSettingsStorageMock(
+          SettingsButton.colorScheme,
+          JSON.stringify(NEW_VALUE)
+        )
+        const updateSettingsSpy = jest.spyOn(peerMessaging, "updateSettings")
+        void initialize()
+
+        settingsStorageMock.setItem(
+          SettingsButton.colorScheme,
+          JSON.stringify(NEW_VALUE)
+        )
+
+        expect(updateSettingsSpy).toBeCalledWith({ colorScheme: NEW_VALUE })
       })
 
       function setupSettingsStorageMock(

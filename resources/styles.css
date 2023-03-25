@@ -1,3 +1,8 @@
+/* Hiding the root elements prevents color flickering when the application starts. */
+#root {
+  display: none;
+}
+
 .application-fill {
   fill: #ffd502;
 }

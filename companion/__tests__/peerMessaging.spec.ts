@@ -7,6 +7,7 @@ jest.doMock("messaging", messagingMockFactory, { virtual: true })
 import * as messaging from "messaging"
 import * as settings from "settings"
 import { AppSettings } from "../../common/AppSettings"
+import { ColorSchemeName } from "../../common/ColorSchemes"
 import type { TotpConfig } from "../../common/TotpConfig"
 import {
   sendSettingsWhenDeviceIsReady,
@@ -31,6 +32,8 @@ describe("peerMessaging", () => {
         return "false"
       } else if (key === SettingsButton.showEnlargedTokensView) {
         return "false"
+      } else if (key === SettingsButton.colorScheme) {
+        return JSON.stringify(ColorSchemeName.default)
       }
     })
   })
@@ -117,7 +120,10 @@ describe("peerMessaging", () => {
       const expectedSettings = {
         shouldUseLargeTokenView: JSON.parse(
           settingsStorageMock.getItem(SettingsButton.showEnlargedTokensView)
-        ) as boolean
+        ) as boolean,
+        colorScheme: JSON.parse(
+          settingsStorageMock.getItem(SettingsButton.colorScheme)
+        ) as ColorSchemeName
       }
       expect(peerSocketMock.send).toBeCalledWith({
         type: "UPDATE_SETTINGS_MESSAGE",

@@ -17,6 +17,7 @@ import { registerDelayedMessageWhetherDeviceIsConnected, updateUi } from ".."
 import { TotpConfig } from "../../../common/TotpConfig"
 import { SettingsManager } from "../../SettingsManager"
 import { TokenManager } from "../../TokenManager"
+import * as colors from "../colors"
 import {
   ADD_TOKENS_VIEW_PATH,
   RETRIEVING_TOKENS_CONNECTION_ISSUE_ID,
@@ -263,6 +264,15 @@ describe("ui", () => {
 
         expect(clockMock.ontick).toBeUndefined()
       })
+    })
+
+    it("invokes function to update the colors", async () => {
+      const updateColorsSpy = jest.spyOn(colors, "updateColors")
+
+      await updateUi(new TokenManager(), new SettingsManager())
+
+      expect(updateColorsSpy).toBeCalled()
+      updateColorsSpy.mockRestore()
     })
   })
 })

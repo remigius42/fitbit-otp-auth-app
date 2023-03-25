@@ -10,6 +10,9 @@ msgstr "Add token via QR tag"
 msgid "Algorithm"
 msgstr "Algorithm"
 
+msgid "Color scheme"
+msgstr "Color scheme"
+
 msgid "Compensate clock drift"
 msgstr "Compensate clock drift"
 

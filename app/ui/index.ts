@@ -4,6 +4,7 @@ import clock from "clock"
 import document from "document"
 import { SettingsManager } from "../SettingsManager"
 import { TokenManager } from "../TokenManager"
+import { updateColors } from "./colors"
 import {
   ADD_TOKENS_VIEW_PATH,
   INDEX_VIEW_PATH,
@@ -38,6 +39,7 @@ export async function updateUi(
   } else {
     await showNoTokensAvailableMessage()
   }
+  updateColors(settingsManager)
 }
 
 async function showNoTokensAvailableMessage() {

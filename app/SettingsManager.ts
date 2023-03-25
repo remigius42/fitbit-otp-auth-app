@@ -1,12 +1,16 @@
 import { AppSettings } from "../common/AppSettings"
 import { UpdateSettingsMessage } from "../common/PeerMessage"
 import * as fs from "fs"
+import { ColorSchemeName } from "../common/ColorSchemes"
 
 type SettingsManagerObserver = (settingsManager: SettingsManager) => void
 
 export class SettingsManager {
   public static readonly SETTINGS_CBOR_PATH = "settings.cbor"
-  private settings: AppSettings = { shouldUseLargeTokenView: false }
+  private settings: AppSettings = {
+    shouldUseLargeTokenView: false,
+    colorScheme: ColorSchemeName.default
+  }
   private readonly observers: Array<SettingsManagerObserver> = []
 
   restoreSettings() {

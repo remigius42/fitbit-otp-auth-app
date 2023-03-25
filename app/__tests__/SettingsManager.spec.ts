@@ -2,6 +2,7 @@ import { fsMockFactory } from "../__mocks__/fs"
 jest.doMock("fs", fsMockFactory, { virtual: true })
 
 import * as fs from "fs"
+import { ColorSchemeName } from "../../common/ColorSchemes"
 import { SettingsManager } from "../SettingsManager"
 
 describe("SettingsManager", () => {
@@ -11,6 +12,13 @@ describe("SettingsManager", () => {
 
       const defaultSettings = settingsManager.getSettings()
       expect(defaultSettings.shouldUseLargeTokenView).toBe(false)
+    })
+
+    it("uses the default color scheme", () => {
+      const settingsManager = new SettingsManager()
+
+      const defaultSettings = settingsManager.getSettings()
+      expect(defaultSettings.colorScheme).toBe(ColorSchemeName.default)
     })
   })
 
@@ -32,7 +40,10 @@ describe("SettingsManager", () => {
       fsMock.existsSync.mockImplementation((filename: string) =>
         filename === SettingsManager.SETTINGS_CBOR_PATH ? true : false
       )
-      const STORED_SETTINGS = { shouldUseLargeTokenView: true }
+      const STORED_SETTINGS = {
+        shouldUseLargeTokenView: true,
+        colorScheme: ColorSchemeName.default
+      }
       fsMock.readFileSync.mockImplementation((filename: string) =>
         filename === SettingsManager.SETTINGS_CBOR_PATH ? STORED_SETTINGS : {}
       )
@@ -51,7 +62,10 @@ describe("SettingsManager", () => {
 
   describe("getSettings", () => {
     it("returns the current settings", () => {
-      const CURRENT_SETTINGS = { shouldUseLargeTokenView: true }
+      const CURRENT_SETTINGS = {
+        shouldUseLargeTokenView: true,
+        colorScheme: ColorSchemeName.fb_aqua
+      }
       const settingsManager = new SettingsManager()
       settingsManager.updateSettings({
         type: "UPDATE_SETTINGS_MESSAGE",
@@ -97,13 +111,22 @@ describe("SettingsManager", () => {
 
     it("stores the updated settings on the device", () => {
       const fsMock = jest.mocked(fs)
-      const UPDATED_SETTINGS = { shouldUseLargeTokenView: true }
+      const UPDATED_SETTINGS = {
+        shouldUseLargeTokenView: true,
+        colorScheme: ColorSchemeName.white
+      }
       const settingsManager = new SettingsManager()
       settingsManager.updateSettings({
         type: "UPDATE_SETTINGS_MESSAGE",
-        updatedSettings: { shouldUseLargeTokenView: false }
+        updatedSettings: {
+          shouldUseLargeTokenView: false,
+          colorScheme: ColorSchemeName.fb_pink
+        }
       })
       expect(settingsManager.getSettings().shouldUseLargeTokenView).toBe(false)
+      expect(settingsManager.getSettings().colorScheme).toBe(
+        ColorSchemeName.fb_pink
+      )
 
       settingsManager.updateSettings({
         type: "UPDATE_SETTINGS_MESSAGE",

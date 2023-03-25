@@ -1,4 +1,5 @@
 import { settingsStorage } from "settings"
+import { ColorSchemeName } from "../common/ColorSchemes"
 import type { TotpConfig } from "../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
@@ -72,6 +73,8 @@ function addSettingsChangeListener() {
       updateSettings({
         shouldUseLargeTokenView: JSON.parse(newValue) as boolean
       })
+    } else if (key === SettingsButton.colorScheme) {
+      updateSettings({ colorScheme: JSON.parse(newValue) as ColorSchemeName })
     }
   })
 }

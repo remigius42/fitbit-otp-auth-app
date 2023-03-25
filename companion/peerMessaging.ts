@@ -1,6 +1,7 @@
 import * as messaging from "messaging"
 import { settingsStorage } from "settings"
 import { AppSettings } from "../common/AppSettings"
+import { ColorSchemeName } from "../common/ColorSchemes"
 import { PeerMessage } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
 import { isCompensatingClockDrift, isStoringTokensOnDevice } from "./settings"
@@ -24,7 +25,10 @@ export function sendSettingsWhenDeviceIsReady() {
     const currentSettings: AppSettings = {
       shouldUseLargeTokenView: JSON.parse(
         settingsStorage.getItem(SettingsButton.showEnlargedTokensView)
-      ) as boolean
+      ) as boolean,
+      colorScheme: JSON.parse(
+        settingsStorage.getItem(SettingsButton.colorScheme)
+      ) as ColorSchemeName
     }
     updateSettings(currentSettings)
   })

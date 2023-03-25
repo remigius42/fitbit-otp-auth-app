@@ -2,6 +2,7 @@ import {
   INDEX_VIEW_PATH,
   RETRIEVING_TOKENS_CONNECTION_ISSUE_ID,
   RETRIEVING_TOKENS_ID,
+  ROOT_ID,
   TOKEN_LIST_ID
 } from "../ui/ids"
 
@@ -30,6 +31,7 @@ interface DocumentMock {
   getElementById: (
     id: string
   ) => GraphicsElement | VirtualTileListElement | undefined
+  getElementsByClassName: (className: string) => Array<GraphicsElement>
   location: {
     assign: (path: string) => Promise<void>
     replace: (path: string) => Promise<void>
@@ -45,6 +47,11 @@ const documentMock: DocumentMock = {
       }
     },
     [RETRIEVING_TOKENS_CONNECTION_ISSUE_ID]: {
+      style: {
+        display: "none"
+      }
+    },
+    [ROOT_ID]: {
       style: {
         display: "none"
       }
@@ -69,6 +76,9 @@ const documentMock: DocumentMock = {
   },
   getElementById(this: DocumentMock, id) {
     return this.elements[id]
+  },
+  getElementsByClassName(this: DocumentMock) {
+    return []
   },
   location: {
     assign(this: DocumentMock["location"], path: string) {

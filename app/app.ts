@@ -4,6 +4,7 @@ import { PeerMessage } from "../common/PeerMessage"
 import { SettingsManager } from "./SettingsManager"
 import { TokenManager } from "./TokenManager"
 import { registerDelayedMessageWhetherDeviceIsConnected, updateUi } from "./ui"
+import { updateColors } from "./ui/colors"
 
 const tokenManager = new TokenManager()
 const settingsManager = new SettingsManager()
@@ -16,6 +17,7 @@ export function initialize() {
       void updateUi(tokenManager, settingsManager)
   )
   settingsManager.restoreSettings()
+  updateColors(settingsManager)
   tokenManager.registerObserver(
     (tokenManager: TokenManager) => void updateUi(tokenManager, settingsManager)
   )
