@@ -55,6 +55,18 @@ describe("companion", () => {
       fallbackToDefaultSettingsSpy.mockRestore()
     })
 
+    it("calls function to set manual token entry fields to their defaults", () => {
+      const setDefaultValuesForManualTokenEntrySpy = jest.spyOn(
+        companionSettings,
+        "setDefaultValuesForManualTokenEntry"
+      )
+
+      void initialize()
+
+      expect(setDefaultValuesForManualTokenEntrySpy).toBeCalled()
+      setDefaultValuesForManualTokenEntrySpy.mockRestore()
+    })
+
     it("calls function to clear all validation messages", () => {
       const clearAllValidationMessagesSpy = jest.spyOn(
         validation,
@@ -245,6 +257,25 @@ describe("companion", () => {
           expect(sendTokensToDeviceSpy).toBeCalledWith([SOME_TOKEN])
           sendTokensToDeviceSpy.mockRestore()
         })
+
+        it("invokes setDefaultValuesForManualTokenEntry function", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenManually
+          )
+          const setDefaultValuesForManualTokenEntrySpy = jest.spyOn(
+            companionSettings,
+            "setDefaultValuesForManualTokenEntry"
+          )
+          void initialize()
+
+          settingsStorageMock.setItem(
+            NewTokenButton.addTokenManually,
+            SOME_STRINGIFIED_JSON
+          )
+
+          expect(setDefaultValuesForManualTokenEntrySpy).toBeCalled()
+          setDefaultValuesForManualTokenEntrySpy.mockRestore()
+        })
       })
 
       describe("when a QR tag image was provided", () => {
@@ -304,26 +335,63 @@ describe("companion", () => {
         addTokenFromQrTagSpy.mockRestore()
       })
 
-      it("resets the new token fields and validation messages if the reset button is clicked", () => {
-        const settingsStorageMock = setupSettingsStorageMock(
-          NewTokenButton.reset
-        )
-        void initialize()
-        const clearValidationsSpy = jest.spyOn(
-          validation,
-          "clearAllValidationMessagesForManualTokens"
-        )
-        const clearFieldsSpy = jest.spyOn(
-          fields,
-          "clearAddTokenManuallyFieldsViaSettings"
-        )
+      describe("when the reset to defaults button is clicked", () => {
+        it("clears the new token fields", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.resetToDefaults
+          )
+          void initialize()
+          const clearFieldsSpy = jest.spyOn(
+            fields,
+            "clearAddTokenManuallyFieldsViaSettings"
+          )
 
-        settingsStorageMock.setItem(NewTokenButton.reset, SOME_STRINGIFIED_JSON)
+          settingsStorageMock.setItem(
+            NewTokenButton.resetToDefaults,
+            SOME_STRINGIFIED_JSON
+          )
 
-        expect(clearFieldsSpy).toBeCalled()
-        expect(clearValidationsSpy).toBeCalled()
-        clearFieldsSpy.mockRestore()
-        clearValidationsSpy.mockRestore()
+          expect(clearFieldsSpy).toBeCalled()
+          clearFieldsSpy.mockRestore()
+        })
+
+        it("clears the validation messages", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.resetToDefaults
+          )
+          void initialize()
+          const clearValidationsSpy = jest.spyOn(
+            validation,
+            "clearAllValidationMessagesForManualTokens"
+          )
+
+          settingsStorageMock.setItem(
+            NewTokenButton.resetToDefaults,
+            SOME_STRINGIFIED_JSON
+          )
+
+          expect(clearValidationsSpy).toBeCalled()
+          clearValidationsSpy.mockRestore()
+        })
+
+        it("sets the new token fields to their default values", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenManually
+          )
+          const setDefaultValuesForManualTokenEntrySpy = jest.spyOn(
+            companionSettings,
+            "setDefaultValuesForManualTokenEntry"
+          )
+          void initialize()
+
+          settingsStorageMock.setItem(
+            NewTokenButton.resetToDefaults,
+            SOME_STRINGIFIED_JSON
+          )
+
+          expect(setDefaultValuesForManualTokenEntrySpy).toBeCalled()
+          setDefaultValuesForManualTokenEntrySpy.mockRestore()
+        })
       })
 
       it("sends updates of the tokens setting to the device", () => {

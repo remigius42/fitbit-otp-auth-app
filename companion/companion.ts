@@ -9,7 +9,10 @@ import {
   sendTokensWhenDeviceIsReady,
   updateSettings
 } from "./peerMessaging"
-import { fallbackToDefaultSettings } from "./settings"
+import {
+  fallbackToDefaultSettings,
+  setDefaultValuesForManualTokenEntry
+} from "./settings"
 import {
   addTokenFromQrTag,
   addTokenManually,
@@ -28,6 +31,7 @@ import {
 
 export async function initialize() {
   fallbackToDefaultSettings()
+  setDefaultValuesForManualTokenEntry()
   clearAllValidationMessages()
   /* Process the QR tag image if one is set. This is possible if the companion
    * app had been unloaded before an image was selected and the resulting
@@ -61,9 +65,11 @@ function addSettingsChangeListener() {
     } else if (key === NewTokenButton.addTokenManually) {
       addTokenManually()
       sendCurrentTokensToDevice()
-    } else if (key === NewTokenButton.reset) {
+      setDefaultValuesForManualTokenEntry()
+    } else if (key === NewTokenButton.resetToDefaults) {
       clearAddTokenManuallyFieldsViaSettings()
       clearAllValidationMessagesForManualTokens()
+      setDefaultValuesForManualTokenEntry()
     } else if (key === TOKENS_SETTINGS_KEY) {
       const tokens = JSON.parse(newValue) as Array<TotpConfig>
       sendTokensToDevice(tokens)

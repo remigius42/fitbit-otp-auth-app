@@ -1,5 +1,5 @@
 export enum NewTokenButton {
   addTokenManually = "addTokenManuallyClicked",
-  reset = "resetClicked",
+  resetToDefaults = "resetToDefaultsClicked",
   addTokenViaQrTag = "addTokenViaQrTagImagePicked"
 }

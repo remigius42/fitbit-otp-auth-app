@@ -90,8 +90,10 @@ export default function SectionAddTokenManually({ settingsStorage }) {
       />
 
       <Button
-        label={gettext("Reset")}
-        onClick={() => settingsStorage.setItem(NewTokenButton.reset, "true")}
+        label={gettext("Reset to defaults")}
+        onClick={() =>
+          settingsStorage.setItem(NewTokenButton.resetToDefaults, "true")
+        }
       />
 
       <ConnectionStatus settingsStorage={settingsStorage} />

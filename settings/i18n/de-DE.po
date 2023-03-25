@@ -51,8 +51,8 @@ msgstr "Anzahl Ziffern"
 msgid "Period in seconds"
 msgstr "Gültigkeitsdauer in Sekunden"
 
-msgid "Reset"
-msgstr "Zurücksetzen"
+msgid "Reset to defaults"
+msgstr "Zurücksetzen auf Standardwerte"
 
 msgid "Secret in Base32"
 msgstr "Schlüssel in Base32"

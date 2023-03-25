@@ -1,4 +1,5 @@
 import { settingsStorage } from "settings"
+import { NEW_TOKEN_DEFAULT_VALUES } from "./ui/NewTokenFieldName"
 import { SettingsButton } from "./ui/SettingsButton"
 
 /**
@@ -16,6 +17,13 @@ export function fallbackToDefaultSettings() {
   if (settingsStorage.getItem(SettingsButton.showEnlargedTokensView) === null) {
     settingsStorage.setItem(SettingsButton.showEnlargedTokensView, "false")
   }
+}
+
+export function setDefaultValuesForManualTokenEntry() {
+  Object.keys(NEW_TOKEN_DEFAULT_VALUES).forEach(
+    (key: keyof typeof NEW_TOKEN_DEFAULT_VALUES) =>
+      settingsStorage.setItem(key, NEW_TOKEN_DEFAULT_VALUES[key])
+  )
 }
 
 export function isCompensatingClockDrift() {

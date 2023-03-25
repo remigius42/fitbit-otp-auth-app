@@ -6,8 +6,13 @@ import * as settings from "settings"
 import {
   fallbackToDefaultSettings,
   isCompensatingClockDrift,
-  isStoringTokensOnDevice
+  isStoringTokensOnDevice,
+  setDefaultValuesForManualTokenEntry
 } from "../settings"
+import {
+  NewTokenFieldName,
+  NEW_TOKEN_DEFAULT_VALUES
+} from "../ui/NewTokenFieldName"
 import { SettingsButton } from "../ui/SettingsButton"
 
 describe("settings", () => {
@@ -48,6 +53,54 @@ describe("settings", () => {
         SettingsButton.showEnlargedTokensView,
         "false"
       )
+    })
+  })
+
+  describe("setDefaultValuesForManualTokenEntry", () => {
+    it("sets algorithm to its default value", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      setDefaultValuesForManualTokenEntry()
+
+      expect(settingsStorageMock.setItem).toHaveBeenCalledWith(
+        NewTokenFieldName.algorithm,
+        NEW_TOKEN_DEFAULT_VALUES[NewTokenFieldName.algorithm]
+      )
+    })
+
+    it("sets digits to its default value", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      setDefaultValuesForManualTokenEntry()
+
+      expect(settingsStorageMock.setItem).toHaveBeenCalledWith(
+        NewTokenFieldName.digits,
+        NEW_TOKEN_DEFAULT_VALUES[NewTokenFieldName.digits]
+      )
+    })
+
+    it("sets algorithm to its default value", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      setDefaultValuesForManualTokenEntry()
+
+      expect(settingsStorageMock.setItem).toHaveBeenCalledWith(
+        NewTokenFieldName.period,
+        NEW_TOKEN_DEFAULT_VALUES[NewTokenFieldName.period]
+      )
+    })
+
+    it("does not set values without a default value", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      setDefaultValuesForManualTokenEntry()
+
+      const changedKeys = settingsStorageMock.setItem.mock.calls.map(
+        ([key]) => key
+      )
+      const expectedKeys = Object.keys(NEW_TOKEN_DEFAULT_VALUES)
+      expect(changedKeys).toStrictEqual(expect.arrayContaining(expectedKeys))
+      expect(settingsStorageMock.setItem).toBeCalledTimes(expectedKeys.length)
     })
   })
 

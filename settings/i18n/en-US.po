@@ -49,8 +49,8 @@ msgstr "Number of digits"
 msgid "Period in seconds"
 msgstr "Period in seconds"
 
-msgid "Reset"
-msgstr "Reset"
+msgid "Reset to defaults"
+msgstr "Reset to defaults"
 
 msgid "Secret in Base32"
 msgstr "Secret in Base32"
