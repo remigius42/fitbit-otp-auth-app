@@ -2,6 +2,12 @@
 
 Thank you for your interest in `fitbit-otp-auth-app`!
 
+## Code of Conduct
+
+This project and everyone participating in it is governed by the
+[CONTRIBUTING.md Code of Conduct](CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code.
+
 ## Development environment setup
 
 The following sections list the prerequisites and the steps required to
