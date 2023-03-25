@@ -10,6 +10,7 @@ ignorePaths:
   - "/.vscode"
   - "/build"
   - "/coverage"
+  - "/resources/icon.svg"
   - "/settings/licenses.js"
 dictionaryDefinitions: []
 dictionaries: ["!de-ch"]

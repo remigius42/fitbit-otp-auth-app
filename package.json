@@ -38,7 +38,7 @@
     "appType": "app",
     "appDisplayName": "OTP Auth",
     "iconFile": "resources/icon.png",
-    "wipeColor": "#ffffff",
+    "wipeColor": "#ffd502",
     "requestedPermissions": [],
     "buildTargets": [
       "atlas",
