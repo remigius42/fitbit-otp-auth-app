@@ -16,6 +16,7 @@ dictionaryDefinitions: []
 dictionaries: ["!de-ch"]
 words:
   - andreas
+  - cbor
   - commitlint
   - fitbit
   - gettext

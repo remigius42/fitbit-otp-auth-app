@@ -1,4 +1,4 @@
-/* spellchecker:ignore MJUXILTMPEXTEWRWMNFEITY, cbor */
+/* spellchecker:ignore MJUXILTMPEXTEWRWMNFEITY */
 
 import { fsMockFactory } from "../__mocks__/fs"
 jest.doMock("fs", fsMockFactory, { virtual: true })

@@ -1,5 +1,3 @@
-/* spellchecker:ignore cbor */
-
 import * as fs from "fs"
 import type {
   UpdateTokensMessage,
