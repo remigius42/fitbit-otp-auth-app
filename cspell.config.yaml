@@ -13,6 +13,8 @@ ignorePaths:
   - "/docs/_site"
   - "/docs/.sass-cache"
   - "/docs/.jekyll-cache"
+  - "/docs/browserconfig.xml" # spellchecker: disable-line
+  - "/docs/safari-pinned-tab.svg"
   - "/resources/icon.svg"
   - "/settings/licenses.js"
 dictionaryDefinitions: []
