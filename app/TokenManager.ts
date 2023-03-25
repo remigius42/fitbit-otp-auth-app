@@ -4,6 +4,7 @@ import type {
   UpdateTokensTokenMessage
 } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
+import { currentPeriod, totp } from "./totp"
 
 type TokenManagerObserver = (tokenManager: TokenManager) => void
 
@@ -11,6 +12,7 @@ export class TokenManager {
   private readonly tokens: Array<TotpConfig> = []
   private readonly updateTokensBuffer = new UpdateTokensBuffer()
   private readonly observers: Array<TokenManagerObserver> = []
+  private readonly passwordCache = new TokenPasswordCache()
 
   handleUpdateTokensMessage(message: UpdateTokensMessage) {
     switch (message.type) {
@@ -45,6 +47,10 @@ export class TokenManager {
 
   getObservers() {
     return this.observers
+  }
+
+  getPassword(totpConfig: TotpConfig) {
+    return this.passwordCache.getPassword(totpConfig)
   }
 
   private updateTokens() {
@@ -115,5 +121,39 @@ received before still pending "token messages" can disrupt an update. */
     this.updateSuccessful = false
     this.hasUpdateStarted = false
     this.tokens.length = 0
+  }
+}
+
+class TokenPasswordCache {
+  /**
+   * Cache is structured as follows: issuer -\> label -\> period -\> password
+   *
+   * Since `Map` has been added with ECMAScript 6 it's not available and joining
+   * the `label` and the `issuer` into a string to simplify the data structure
+   * might lead to collisions.
+   */
+  private readonly cache: Record<
+    string,
+    Record<string, Record<number, string>>
+  > = {}
+
+  getPassword(totpConfig: TotpConfig) {
+    const { issuer, label, period: periodString } = totpConfig
+    this.ensureIssuerAndLabelAreRegistered(issuer, label)
+    const period = Number(periodString)
+    const currentPeriodIndex = currentPeriod(period)
+    if (!this.cache[issuer][label][currentPeriodIndex]) {
+      this.cache[issuer][label] = { [currentPeriodIndex]: totp(totpConfig) }
+    }
+    return this.cache[issuer][label][currentPeriodIndex]
+  }
+
+  private ensureIssuerAndLabelAreRegistered(issuer: string, label: string) {
+    if (!this.cache[issuer]) {
+      this.cache[issuer] = {}
+    }
+    if (!this.cache[issuer][label]) {
+      this.cache[issuer][label] = {}
+    }
   }
 }

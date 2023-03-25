@@ -51,9 +51,17 @@ export function totp(totpConfig: TotpConfig) {
  * https://www.rfc-editor.org/rfc/rfc6238#page-13 for further information.
  */
 function counterHexString(period: number) {
-  const currentPeriod = Math.floor(Date.now() / 1000 / period)
-  const periodHexString = currentPeriod.toString(16)
+  const periodHexString = currentPeriod(period).toString(16)
   return padStartWithZeros(periodHexString, 16)
+}
+
+/**
+ * Get the current period number with respect to the given duration in seconds.
+ *
+ * @returns current period index starting at 0
+ */
+export function currentPeriod(period: number) {
+  return Math.floor(Date.now() / 1000 / period)
 }
 
 /**

@@ -1,5 +1,5 @@
 import { TotpConfig } from "../../common/TotpConfig"
-import { totp } from "../totp"
+import { currentPeriod, totp } from "../totp"
 
 describe("totp", () => {
   const RFC4226_TEST_VECTORS = [
@@ -117,5 +117,16 @@ describe("totp", () => {
     expect(totp(totpConfigMixedCaseSecret)).toBe(
       totp(totpConfigUpperCaseSecret)
     )
+  })
+
+  it("currentPeriod returns the current period (starting at 0) based on the given duration in seconds", () => {
+    jest.useFakeTimers()
+    const SOME_SECONDS = 42
+    jest.setSystemTime(SOME_SECONDS * 1000)
+
+    const period = currentPeriod(30)
+
+    expect(period).toBe(1)
+    jest.useRealTimers()
   })
 })
