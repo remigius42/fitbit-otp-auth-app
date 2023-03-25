@@ -1,5 +1,40 @@
+# spellchecker:words tokenalgorithmus
+
+msgid "Add token"
+msgstr "Token hinzufügen"
+
+msgid "Add token manually"
+msgstr "Token manuell hinzufügen"
+
+msgid "Algorithm"
+msgstr "Algorithmus"
+
+msgid "Issuer"
+msgstr "Aussteller"
+
+msgid "Label"
+msgstr "Bezeichnung"
+
 msgid "License information"
 msgstr "Lizenzinformationen"
+
+msgid "Number of digits"
+msgstr "Anzahl Ziffern"
+
+msgid "Period in seconds"
+msgstr "Gültigkeitsdauer in Sekunden"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Secret in Base32"
+msgstr "Schlüssel in Base32"
+
+msgid "Select number of digits"
+msgstr "Anzahl Ziffern auswählen"
+
+msgid "Select token algorithm"
+msgstr "Tokenalgorithmus auswählen"
 
 msgid "Third-party licenses"
 msgstr "Lizenzen von Drittanbietern"

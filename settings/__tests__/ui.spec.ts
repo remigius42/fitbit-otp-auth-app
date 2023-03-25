@@ -1,6 +1,15 @@
 jest.doMock("i18n", () => ({ gettext: jest.fn() }), { virtual: true })
 
-import { getCopyright, getVersion, thirdPartyLicenseKeys } from "../ui"
+import {
+  NewTokenFieldName,
+  NewTokenFieldNameValues
+} from "../../companion/ui/NewTokenFieldName"
+import {
+  getCopyright,
+  getValidationMessageSetting,
+  getVersion,
+  thirdPartyLicenseKeys
+} from "../ui"
 
 describe("ui", () => {
   const testLicenses = {
@@ -17,6 +26,19 @@ describe("ui", () => {
       copyright: "some other package copyright"
     }
   }
+
+  describe("getValidationMessageSetting", () => {
+    it.each(NewTokenFieldNameValues)(
+      "returns the given field name with validation key suffix for %s",
+      (fieldName: NewTokenFieldName) => {
+        const VALIDATION_FIELD_SUFFIX = "Error"
+
+        const validationSettingsKey = getValidationMessageSetting(fieldName)
+
+        expect(validationSettingsKey).toBe(fieldName + VALIDATION_FIELD_SUFFIX)
+      }
+    )
+  })
 
   describe("getVersion", () => {
     it("extracts the version of this NPM package from the license data", () => {

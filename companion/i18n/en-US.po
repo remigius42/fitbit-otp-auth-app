@@ -1,0 +1,23 @@
+msgid "Error: Algorithm must be selected"
+msgstr "Algorithm must be selected"
+
+msgid "Error: Issuer should match label issuer prefix"
+msgstr "Error: Issuer should match label issuer prefix (@issuer_prefix)"
+
+msgid "Error: Label must not be empty"
+msgstr "Label must not be empty"
+
+msgid "Error: Number of digits must be selected"
+msgstr "Number of digits must be selected"
+
+msgid "Error: Period must be a whole number greater 0"
+msgstr "Period must be a whole number greater 0"
+
+msgid "Error: Period must not be empty"
+msgstr "Period must not be empty"
+
+msgid "Error: Secret cannot be decoded"
+msgstr "Secret cannot be decoded"
+
+msgid "Error: Secret must not be empty"
+msgstr "Secret must not be empty"

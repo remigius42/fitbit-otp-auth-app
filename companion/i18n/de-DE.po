@@ -1,0 +1,25 @@
+# spellchecker:words ganzzahl
+
+msgid "Error: Algorithm must be selected"
+msgstr "Algorithmus muss ausgewählt sein"
+
+msgid "Error: Issuer should match label issuer prefix"
+msgstr "Error: Aussteller sollte mit dem Ausstellerpräfix der Bezeichnung übereinstimmen (@issuer_prefix)"
+
+msgid "Error: Label must not be empty"
+msgstr "Bezeichnung darf nicht leer sein"
+
+msgid "Error: Number of digits must be selected"
+msgstr "Anzahl Ziffern muss ausgewählt sein"
+
+msgid "Error: Period must be a whole number greater 0"
+msgstr "Gültigkeitsdauer muss eine Ganzzahl grösser 0 sein"
+
+msgid "Error: Period must not be empty"
+msgstr "Gültigkeitsdauer darf nicht leer sein"
+
+msgid "Error: Secret cannot be decoded"
+msgstr "Schlüssel kann nicht dekodiert werden"
+
+msgid "Error: Secret must not be empty"
+msgstr "Schlüssel darf nicht leer sein"

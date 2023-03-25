@@ -1,5 +1,38 @@
+msgid "Add token"
+msgstr "Add token"
+
+msgid "Add token manually"
+msgstr "Add token manually"
+
+msgid "Algorithm"
+msgstr "Algorithm"
+
+msgid "Issuer"
+msgstr "Issuer"
+
+msgid "Label"
+msgstr "Label"
+
 msgid "License information"
 msgstr "License information"
+
+msgid "Number of digits"
+msgstr "Number of digits"
+
+msgid "Period in seconds"
+msgstr "Period in seconds"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Secret in Base32"
+msgstr "Secret in Base32"
+
+msgid "Select number of digits"
+msgstr "Select number of digits"
+
+msgid "Select token algorithm"
+msgstr "Select token algorithm"
 
 msgid "Third-party licenses"
 msgstr "Third-party licenses"
