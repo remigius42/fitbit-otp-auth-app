@@ -10,14 +10,22 @@ ignorePaths:
   - "/.vscode"
   - "/build"
   - "/coverage"
+  - "/cspell.dictionary_swiss-german_project.txt"
   - "/docs/_site"
   - "/docs/.sass-cache"
   - "/docs/.jekyll-cache"
+  - "/docs/assets/screenshots/**/*.xcf"
   - "/docs/browserconfig.xml" # spellchecker: disable-line
   - "/docs/safari-pinned-tab.svg"
   - "/resources/icon.svg"
   - "/settings/licenses.js"
-dictionaryDefinitions: []
+dictionaryDefinitions:
+  [
+    {
+      name: "de-ch-project",
+      path: "./cspell.dictionary_swiss-german_project.txt"
+    }
+  ]
 dictionaries: ["!de-ch"]
 words:
   - andreas
@@ -41,6 +49,6 @@ flagWords:
   - topt # spellchecker: disable-line
 overrides:
   - filename: "**/i18n/de-DE.po"
-    dictionaries: ["!!de-ch"]
+    dictionaries: ["!!de-ch", "de-ch-project"]
   - filename: "docs/collections/_app_de/**/*.md"
-    dictionaries: ["!!de-ch", "!en_us"]
+    dictionaries: ["!!de-ch", "de-ch-project", "!en_us"]

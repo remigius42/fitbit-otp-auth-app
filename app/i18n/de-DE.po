@@ -1,5 +1,3 @@
-# spellchecker:words Uhrenabgleich
-
 msgid "Could not retrieve the tokens. Is your device connected with your phone?"
 msgstr "Token konnten nicht geladen werden. Ist Ihr Gerät mit Ihrem Mobiltelefon verbunden?"
 
