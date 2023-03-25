@@ -66,7 +66,7 @@ jobs:
       - name: Generate documentation
         run: bundle exec jekyll build --strict_front_matter --destination ./_site/fitbit-otp-auth-app --baseurl /fitbit-otp-auth-app # use `destination` to simulate non-root hosting for `htmlproofer`
       - name: Check documentation (html-proofer)
-        run: bundle exec htmlproofer ./_site
+        run: bundle exec htmlproofer --typhoeus='{"headers":{"User-Agent":"Mozilla/5.0 (compatible; GitHub build HTML checker)"}}' ./_site # buymeacoffee.com blocks the default `html-proofer` user agent. Since the builds and their resulting checks are infrequent, this workaround should be acceptable, because buymeacoffee has an interest in having their inbound traffic working too.
   security_scan:
     name: security scan
     runs-on: ubuntu-latest

@@ -1,5 +1,7 @@
 # [fitbit-otp-auth-app](https://github.com/remigius42/fitbit-otp-auth-app)
 
+<!-- spellchecker:ignore lato -->
+
 Copyright 2023 binary poetry gmbh. All rights reserved.
 
 [![Build status](https://github.com/remigius42/fitbit-otp-auth-app/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/remigius42/fitbit-otp-auth-app/actions/workflows/node.js.yml)
@@ -46,3 +48,11 @@ documentation</a>.
 Thanks for your interest in contributing! There are many ways to contribute to
 this project. Get started by having a look at
 [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Funding
+
+This project is powered by coffee, therefore I would appreciate if you could
+
+<a href="https://www.buymeacoffee.com/remigius" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
+thank you!

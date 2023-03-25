@@ -13,6 +13,9 @@ export default function SectionIntroduction() {
       <Link source="https://remigius42.github.io/fitbit-otp-auth-app/">
         {gettext("User documentation")}
       </Link>
+      <Link source="https://www.buymeacoffee.com/remigius">
+        {gettext("Please help support this app by donating a coffee")}
+      </Link>
     </Section>
   )
 }

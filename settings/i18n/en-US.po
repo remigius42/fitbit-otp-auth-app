@@ -52,6 +52,9 @@ msgstr "Number of digits"
 msgid "Period in seconds"
 msgstr "Period in seconds"
 
+msgid "Please help support this app by donating a coffee"
+msgstr "Please help support this app by donating a coffee"
+
 msgid "Reset to defaults"
 msgstr "Reset to defaults"
 

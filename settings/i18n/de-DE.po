@@ -54,6 +54,9 @@ msgstr "Anzahl Ziffern"
 msgid "Period in seconds"
 msgstr "Gültigkeitsdauer in Sekunden"
 
+msgid "Please help support this app by donating a coffee"
+msgstr "Bitte unterstützen Sie diese App mit einem Kaffee"
+
 msgid "Reset to defaults"
 msgstr "Zurücksetzen auf Standardwerte"
 
