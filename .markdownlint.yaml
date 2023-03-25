@@ -1,0 +1,5 @@
+# markdownlint configuration for the Visual Studio Code extension and the pre-commit hook.
+# see https://github.com/DavidAnson/markdownlint/blob/main/README.md#options
+default: true # enables all rules except the deprecated ones
+MD013: false # disable line length checks based on the rationale given at https://mdformat.readthedocs.io/en/stable/users/style.html#paragraph-word-wrapping
+MD033: false # allow inline HTML due to Markdown limitations like missing <time>, <kbd>, <samp> etc. equivalents.

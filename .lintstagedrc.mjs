@@ -3,7 +3,8 @@ const LINT_STAGED_CONFIG = {
     mapFilesToInvocations(
       "prettier --no-error-on-unmatched-pattern --ignore-unknown --list-different",
       files
-    )
+    ),
+  "**/*.md": files => mapFilesToInvocations("markdownlint-cli2", files)
 }
 
 /**
