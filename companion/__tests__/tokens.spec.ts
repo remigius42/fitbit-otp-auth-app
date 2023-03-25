@@ -1,4 +1,4 @@
-/* spellchecker:ignore msgid MJUXILTMPEXTEWRWMNFEITY */
+/* spellchecker:ignore msgid MJUXILTMPEXTEWRWMNFEITY qrcode nuintun*/
 
 import { settingsMockFactory } from "../__mocks__/settings"
 jest.doMock("settings", settingsMockFactory, { virtual: true })
@@ -6,18 +6,38 @@ jest.doMock("settings", settingsMockFactory, { virtual: true })
 import { i18nMockFactory } from "../__mocks__/i18n"
 jest.doMock("i18n", i18nMockFactory, { virtual: true })
 
+const VALID_OTP_URI =
+  "otpauth://totp/some%20issuer:some%20label?secret=MJUXILTMPEXTEWRWMNFEITY"
+const INVALID_OTP_URI = "otpauth://totp/noSecret?period=30"
+const qrcodeScanMock = jest.fn().mockResolvedValue({
+  data: VALID_OTP_URI
+})
+jest.doMock("@nuintun/qrcode", () => {
+  const decoder = {
+    scan: qrcodeScanMock,
+    setOptions(this: Decoder) {
+      return this
+    }
+  }
+  return {
+    Decoder: jest.fn(() => decoder)
+  }
+})
+
+import { Decoder } from "@nuintun/qrcode"
 import * as settings from "settings"
 import { getDisplayName, getValidationMessageSetting } from "../../settings/ui"
 import * as i18nUtils from "../i18nUtils"
 import {
-  addToken,
+  addTokenFromQrTag,
+  addTokenManually,
   addTokenToSettings,
   getErrorMessageForDuplicateToken,
   getMatchingExistingToken,
   TOKENS_SETTINGS_KEY,
   TotpConfig,
   updateDisplayName,
-  validateNewToken
+  validateNewManualToken
 } from "../tokens"
 import * as fields from "../ui/fields"
 import { NewTokenButton } from "../ui/NewTokenButton"
@@ -46,14 +66,148 @@ describe("tokens", () => {
     issuer: "some issuer"
   }
 
-  describe("addToken", () => {
+  describe("addTokenFromQrTag", () => {
+    const SOME_IMAGE_URI = "some image URI"
+
+    it("should add the token if its configuration is valid and new", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: VALID_OTP_URI
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        "tokens",
+        expect.any(String)
+      )
+    })
+
+    it("should clear the validation message if the token is added", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: VALID_OTP_URI
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
+      )
+    })
+
+    it("should show error message if matching token already exists", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: VALID_OTP_URI
+      })
+      settingsMockWithTokens([SOME_TOTP_CONFIG_WITH_ISSUER])
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+        "Error: Token with same label and issuer already exists"
+      )
+    })
+
+    it("should not add the token if its configuration is invalid", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: INVALID_OTP_URI
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).not.toBeCalledWith(
+        "tokens",
+        expect.any(String)
+      )
+    })
+
+    it("should show validations errors the token configuration is invalid", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      const INVALID_OTP_URI_NO_LABEL_NO_SECRET = "otpauth://totp/"
+      qrcodeScanMock.mockResolvedValue({
+        data: INVALID_OTP_URI_NO_LABEL_NO_SECRET
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+        "Error: Label must not be empty, Error: Secret must not be empty"
+      )
+    })
+
+    it("should show error message if the QR tag cannot be decoded", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockRejectedValue(new Error("some decoding error"))
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+        "Error: Could not decode QR tag"
+      )
+    })
+
+    it("should show error message if the QR tag does not decode to an otpauth URL", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({ data: "this it not a URL" })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+        "Error: Could not decode QR tag"
+      )
+    })
+
+    it("should clear the image picker field if the token is valid", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: VALID_OTP_URI
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        NewTokenButton.addTokenViaQrTag
+      )
+    })
+
+    it("should clear the image picker field if the token is invalid", async () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      qrcodeScanMock.mockReset()
+      qrcodeScanMock.mockResolvedValue({
+        data: INVALID_OTP_URI
+      })
+
+      await addTokenFromQrTag(SOME_IMAGE_URI)
+
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        NewTokenButton.addTokenViaQrTag
+      )
+    })
+  })
+
+  describe("addTokenManually", () => {
     it("should add the token if its configuration is valid and new", () => {
       const settingsStorageMock = jest.mocked(settings).settingsStorage
       settingsStorageMock.getItem.mockImplementation(
         getItemForValidTokenSettings
       )
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.setItem).toBeCalledWith(
         "tokens",
@@ -67,10 +221,10 @@ describe("tokens", () => {
         getItemForValidTokenSettings
       )
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.removeItem).toBeCalledWith(
-        getValidationMessageSetting(NewTokenButton.addToken)
+        getValidationMessageSetting(NewTokenButton.addTokenManually)
       )
     })
 
@@ -83,7 +237,7 @@ describe("tokens", () => {
         }
       ])
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.setItem).not.toBeCalledWith(
         "tokens",
@@ -100,10 +254,10 @@ describe("tokens", () => {
         }
       ])
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.setItem).toBeCalledWith(
-        getValidationMessageSetting(NewTokenButton.addToken),
+        getValidationMessageSetting(NewTokenButton.addTokenManually),
         "Error: Token with same label and issuer already exists"
       )
     })
@@ -118,7 +272,7 @@ describe("tokens", () => {
         )
       )
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.setItem).toBeCalledWith(
         getValidationMessageSetting(NewTokenFieldName.period),
@@ -136,7 +290,7 @@ describe("tokens", () => {
         )
       )
 
-      addToken()
+      addTokenManually()
 
       expect(settingsStorageMock.setItem).not.toBeCalledWith(
         "tokens",
@@ -154,7 +308,7 @@ describe("tokens", () => {
         "clearAddTokenManuallyFieldsViaSettings"
       )
 
-      addToken()
+      addTokenManually()
 
       expect(clearAddTokenManuallyFieldsViaSettingsSpy).toBeCalled()
       clearAddTokenManuallyFieldsViaSettingsSpy.mockRestore()
@@ -174,14 +328,14 @@ describe("tokens", () => {
         )
       )
 
-      addToken()
+      addTokenManually()
 
       expect(clearAddTokenManuallyFieldsViaSettingsSpy).not.toBeCalled()
       clearAddTokenManuallyFieldsViaSettingsSpy.mockRestore()
     })
   })
 
-  describe("validateNewToken", () => {
+  describe("validateNewManualToken", () => {
     it.each(NewTokenFieldNameValues)(
       "should update the validation of the given field name for %s",
       (fieldName: NewTokenFieldName) => {
@@ -195,7 +349,7 @@ describe("tokens", () => {
           patchGetItemForValidTokenSettings(fieldName, INVALID_EMPTY_STRING)
         )
 
-        validateNewToken(fieldName)
+        validateNewManualToken(fieldName)
 
         expect(updateValidationForFieldSpy).toBeCalledWith(
           expect.any(Map<NewTokenFieldName, string>),
@@ -218,7 +372,7 @@ describe("tokens", () => {
           patchGetItemForValidTokenSettings(testFieldName, INVALID_EMPTY_STRING)
         )
 
-        validateNewToken(testFieldName)
+        validateNewManualToken(testFieldName)
 
         NewTokenFieldNameValues.filter(
           fieldName => fieldName !== testFieldName
@@ -243,7 +397,7 @@ describe("tokens", () => {
         jest.fn(() => INVALID_EMPTY_STRING)
       )
 
-      validateNewToken()
+      validateNewManualToken()
 
       NewTokenFieldNameValues.forEach(fieldName =>
         expect(updateValidationForFieldSpy).toBeCalledWith(
@@ -283,7 +437,9 @@ describe("tokens", () => {
           patchGetItemForValidTokenSettings(testFieldName, "")
         )
 
-        const { validationErrors } = validateNewToken(NewTokenFieldName.label)
+        const { validationErrors } = validateNewManualToken(
+          NewTokenFieldName.label
+        )
 
         expect(validationErrors.get(testFieldName)).toBe(msgid)
       }
@@ -309,7 +465,9 @@ describe("tokens", () => {
         }
       )
 
-      const { validationErrors } = validateNewToken(NewTokenFieldName.issuer)
+      const { validationErrors } = validateNewManualToken(
+        NewTokenFieldName.issuer
+      )
 
       expect(validationErrors.get(NewTokenFieldName.issuer)).toBe(
         "Error: Issuer should match label issuer prefix"
@@ -325,7 +483,9 @@ describe("tokens", () => {
         )
       )
 
-      const { validationErrors } = validateNewToken(NewTokenFieldName.secret)
+      const { validationErrors } = validateNewManualToken(
+        NewTokenFieldName.secret
+      )
 
       expect(validationErrors.get(NewTokenFieldName.secret)).toBeUndefined()
     })
@@ -339,7 +499,9 @@ describe("tokens", () => {
         )
       )
 
-      const { validationErrors } = validateNewToken(NewTokenFieldName.secret)
+      const { validationErrors } = validateNewManualToken(
+        NewTokenFieldName.secret
+      )
 
       expect(validationErrors.get(NewTokenFieldName.secret)).toBe(
         "Error: Secret cannot be decoded"
@@ -352,7 +514,9 @@ describe("tokens", () => {
         patchGetItemForValidTokenSettings(NewTokenFieldName.period, "23.42")
       )
 
-      const { validationErrors } = validateNewToken(NewTokenFieldName.period)
+      const { validationErrors } = validateNewManualToken(
+        NewTokenFieldName.period
+      )
 
       expect(validationErrors.get(NewTokenFieldName.period)).toBe(
         "Error: Period must be a whole number greater 0"
@@ -365,7 +529,9 @@ describe("tokens", () => {
         patchGetItemForValidTokenSettings(NewTokenFieldName.period, "-23")
       )
 
-      const { validationErrors } = validateNewToken(NewTokenFieldName.period)
+      const { validationErrors } = validateNewManualToken(
+        NewTokenFieldName.period
+      )
 
       expect(validationErrors.get(NewTokenFieldName.period)).toBe(
         "Error: Period must be a whole number greater 0"

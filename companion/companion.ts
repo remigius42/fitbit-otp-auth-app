@@ -1,18 +1,28 @@
 import { settingsStorage } from "settings"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
-  addToken,
+  addTokenFromQrTag,
+  addTokenManually,
   TotpConfig,
   updateDisplayName,
-  validateNewToken
+  validateNewManualToken
 } from "./tokens"
 import { clearAddTokenManuallyFieldsViaSettings } from "./ui/fields"
 import { NewTokenButton } from "./ui/NewTokenButton"
 import { NewTokenFieldNameValues } from "./ui/NewTokenFieldName"
-import { clearAllValidationMessages } from "./ui/validation"
+import {
+  clearAllValidationMessages,
+  clearAllValidationMessagesForManualTokens
+} from "./ui/validation"
 
-export function initialize() {
+export async function initialize() {
   clearAllValidationMessages()
+  /* Process the QR tag image if one is set. This is possible if the companion
+   * app had been unloaded before an image was selected and the resulting
+   * settings changes triggered the companion start. */
+  if (settingsStorage.getItem(NewTokenButton.addTokenViaQrTag)) {
+    await addTokenFromImage()
+  }
   addSettingsChangeListener()
 }
 
@@ -27,14 +37,22 @@ function addSettingsChangeListener() {
     } else if (
       NewTokenFieldNameValues.map(name => String(name)).indexOf(key) !== -1
     ) {
-      validateNewToken(
+      validateNewManualToken(
         NewTokenFieldNameValues.find(fieldName => String(fieldName) === key)
       )
-    } else if (key === NewTokenButton.addToken) {
-      addToken()
+    } else if (key === NewTokenButton.addTokenViaQrTag) {
+      void addTokenFromImage()
+    } else if (key === NewTokenButton.addTokenManually) {
+      addTokenManually()
     } else if (key === NewTokenButton.reset) {
       clearAddTokenManuallyFieldsViaSettings()
-      clearAllValidationMessages()
+      clearAllValidationMessagesForManualTokens()
     }
   })
+}
+
+function addTokenFromImage() {
+  const pickedImage = settingsStorage.getItem(NewTokenButton.addTokenViaQrTag)
+  const { imageUri } = JSON.parse(pickedImage) as { imageUri: string }
+  return addTokenFromQrTag(imageUri)
 }

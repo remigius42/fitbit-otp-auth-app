@@ -4,8 +4,23 @@ msgstr "Add token"
 msgid "Add token manually"
 msgstr "Add token manually"
 
+msgid "Add token via QR tag"
+msgstr "Add token via QR tag"
+
 msgid "Algorithm"
 msgstr "Algorithm"
+
+msgid "Current QR tag image."
+msgstr "Current QR tag image."
+
+msgid "Display name"
+msgstr "Display name"
+
+msgid "Import new QR tag"
+msgstr "Import new QR tag"
+
+msgid "Import QR tag from an image"
+msgstr "Import QR tag from an image"
 
 msgid "Issuer"
 msgstr "Issuer"

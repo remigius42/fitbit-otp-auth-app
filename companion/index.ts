@@ -1,3 +1,3 @@
 import { initialize } from "./companion"
 
-initialize()
+void initialize()

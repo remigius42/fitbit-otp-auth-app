@@ -1,8 +1,12 @@
+/* spell-checker:ignore nuintun qrcode */
+
 import base32decode from "base32-decode"
+import { Decoder } from "@nuintun/qrcode"
 import { gettext } from "i18n"
 import { settingsStorage } from "settings"
 import { getDisplayName, getValidationMessageSetting } from "../settings/ui"
 import { gettextWithReplacement } from "./i18nUtils"
+import { totpConfigFromUri } from "./keyUri"
 import {
   clearAddTokenManuallyFieldsViaSettings,
   getSingleSelectValueFromSettings,
@@ -20,8 +24,43 @@ import {
 
 export const TOKENS_SETTINGS_KEY = "tokens"
 
-export function addToken() {
-  const { tokenConfig, validationErrors } = validateNewToken()
+export async function addTokenFromQrTag(imageUri: string) {
+  settingsStorage.removeItem(
+    getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
+  )
+  const qrcode = new Decoder().setOptions({ canOverwriteImage: true })
+  try {
+    const { data: otpUri } = await qrcode.scan(imageUri)
+    const tokenConfig = totpConfigFromUri(otpUri)
+    const validationErrors = validateConfig(tokenConfig)
+    if (validationErrors.size === 0) {
+      const matchingExistingToken = getMatchingExistingToken(tokenConfig)
+      if (!matchingExistingToken) {
+        addTokenToSettings(tokenConfig)
+      } else {
+        settingsStorage.setItem(
+          getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+          getErrorMessageForDuplicateToken(matchingExistingToken)
+        )
+      }
+    } else {
+      settingsStorage.setItem(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+        Array.from(validationErrors.values()).join(", ")
+      )
+    }
+  } catch {
+    settingsStorage.setItem(
+      getValidationMessageSetting(NewTokenButton.addTokenViaQrTag),
+      gettext("Error: Could not decode QR tag")
+    )
+  } finally {
+    settingsStorage.removeItem(NewTokenButton.addTokenViaQrTag)
+  }
+}
+
+export function addTokenManually() {
+  const { tokenConfig, validationErrors } = validateNewManualToken()
 
   if (validationErrors.size === 0) {
     const matchingExistingToken = getMatchingExistingToken(tokenConfig)
@@ -31,14 +70,14 @@ export function addToken() {
       addTokenToSettings(tokenConfig)
     } else {
       settingsStorage.setItem(
-        getValidationMessageSetting(NewTokenButton.addToken),
+        getValidationMessageSetting(NewTokenButton.addTokenManually),
         getErrorMessageForDuplicateToken(matchingExistingToken)
       )
     }
   }
 }
 
-export function validateNewToken(fieldName?: NewTokenFieldName) {
+export function validateNewManualToken(fieldName?: NewTokenFieldName) {
   const tokenConfig = mapTokenFieldsToTotpConfig()
   const validationErrors = validateConfig(tokenConfig)
   if (fieldName) {

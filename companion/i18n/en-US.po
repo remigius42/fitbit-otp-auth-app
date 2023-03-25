@@ -1,6 +1,9 @@
 msgid "Error: Algorithm must be selected"
 msgstr "Algorithm must be selected"
 
+msgid "Error: Could not decode QR tag"
+msgstr "Could not decode QR tag"
+
 msgid "Error: Issuer should match label issuer prefix"
 msgstr "Error: Issuer should match label issuer prefix (@issuer_prefix)"
 

@@ -10,6 +10,7 @@ import {
 } from "../NewTokenFieldName"
 import {
   clearAllValidationMessages,
+  clearAllValidationMessagesForManualTokens,
   clearValidationForAllFields,
   updateValidationForField
 } from "../validation"
@@ -72,7 +73,37 @@ describe("validation", () => {
         )
       )
       expect(settingsStorageMock.removeItem).toBeCalledWith(
-        getValidationMessageSetting(NewTokenButton.addToken)
+        getValidationMessageSetting(NewTokenButton.addTokenManually)
+      )
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
+      )
+    })
+  })
+
+  describe("clearAllValidationMessagesForManualTokens", () => {
+    it("should remove settings entries for all validation messages related to manual tokens", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      clearAllValidationMessagesForManualTokens()
+
+      NewTokenFieldNameValues.forEach(fieldName =>
+        expect(settingsStorageMock.removeItem).toBeCalledWith(
+          getValidationErrorSetting(fieldName)
+        )
+      )
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenManually)
+      )
+    })
+
+    it("should not remove settings entries for the QR tag button", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      clearAllValidationMessagesForManualTokens()
+
+      expect(settingsStorageMock.removeItem).not.toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
       )
     })
   })

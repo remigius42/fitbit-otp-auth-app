@@ -18,9 +18,16 @@ export function updateValidationForField(
 }
 
 export function clearAllValidationMessages() {
+  settingsStorage.removeItem(
+    getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
+  )
+  clearAllValidationMessagesForManualTokens()
+}
+
+export function clearAllValidationMessagesForManualTokens() {
   clearValidationForAllFields()
   settingsStorage.removeItem(
-    getValidationMessageSetting(NewTokenButton.addToken)
+    getValidationMessageSetting(NewTokenButton.addTokenManually)
   )
 }
 

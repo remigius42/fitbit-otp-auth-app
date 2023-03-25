@@ -79,11 +79,13 @@ export default function SectionAddTokenManually({ settingsStorage }) {
 
       <Button
         label={gettext("Add token")}
-        onClick={() => settingsStorage.setItem(NewTokenButton.addToken, "true")}
+        onClick={() =>
+          settingsStorage.setItem(NewTokenButton.addTokenManually, "true")
+        }
       />
       <ValidationMessage
         settingsStorage={settingsStorage}
-        componentName={NewTokenButton.addToken}
+        componentName={NewTokenButton.addTokenManually}
       />
 
       <Button

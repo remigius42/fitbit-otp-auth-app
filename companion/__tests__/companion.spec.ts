@@ -17,7 +17,10 @@ import {
 import * as validation from "../ui/validation"
 
 describe("companion", () => {
-  beforeEach(jest.clearAllMocks)
+  beforeEach(() => jest.resetAllMocks())
+
+  const SOME_IMAGE_URI = "some URI"
+  const SOME_PICKED_IMAGE_VALUE = JSON.stringify({ imageUri: SOME_IMAGE_URI })
 
   describe("initialize", () => {
     const SOME_STRINGIFIED_JSON = '"some stringified JSON"'
@@ -28,16 +31,44 @@ describe("companion", () => {
         "clearAllValidationMessages"
       )
 
-      initialize()
+      void initialize()
 
       expect(clearAllValidationMessagesSpy).toBeCalled()
       clearAllValidationMessagesSpy.mockRestore()
     })
 
+    it("invokes addTokenFromQrTag if an image is already picked upon companion start", () => {
+      const addTokenFromQrTagSpy = jest
+        .spyOn(tokens, "addTokenFromQrTag")
+        .mockImplementation(jest.fn())
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation((key: string) => {
+        if (key === NewTokenButton.addTokenViaQrTag) {
+          return SOME_PICKED_IMAGE_VALUE
+        }
+      })
+
+      void initialize()
+
+      expect(addTokenFromQrTagSpy).toBeCalledWith(SOME_IMAGE_URI)
+      addTokenFromQrTagSpy.mockRestore()
+    })
+
+    it("does not invoke addTokenFromQrTag if no image is picked upon companion start", () => {
+      const addTokenFromQrTagSpy = jest
+        .spyOn(tokens, "addTokenFromQrTag")
+        .mockImplementation(jest.fn())
+
+      void initialize()
+
+      expect(addTokenFromQrTagSpy).not.toBeCalledWith(SOME_IMAGE_URI)
+      addTokenFromQrTagSpy.mockRestore()
+    })
+
     it("adds a settings change listener", () => {
       const settingsStorageMock = jest.mocked(settings).settingsStorage
 
-      initialize()
+      void initialize()
 
       expect(settingsStorageMock.addEventListener).toBeCalledWith(
         "change",
@@ -65,7 +96,7 @@ describe("companion", () => {
           DISPLAY_NAME_UPDATE
         )
         const updateDisplayNameSpy = jest.spyOn(tokens, "updateDisplayName")
-        initialize()
+        void initialize()
 
         settingsStorageMock.setItem(
           UPDATE_DISPLAY_NAME_SETTINGS_KEY,
@@ -83,40 +114,77 @@ describe("companion", () => {
         "triggers the validation if new token field %s changes",
         (fieldName: NewTokenFieldName) => {
           const settingsStorageMock = setupSettingsStorageMock(fieldName)
-          const validateNewTokenSpy = jest.spyOn(tokens, "validateNewToken")
-          initialize()
+          const validateNewManualTokenSpy = jest.spyOn(
+            tokens,
+            "validateNewManualToken"
+          )
+          void initialize()
 
           settingsStorageMock.setItem(fieldName, SOME_STRINGIFIED_JSON)
 
-          expect(validateNewTokenSpy).toBeCalledWith(fieldName)
-          validateNewTokenSpy.mockRestore()
+          expect(validateNewManualTokenSpy).toBeCalledWith(fieldName)
+          validateNewManualTokenSpy.mockRestore()
         }
       )
 
       it("invokes addToken function if the add token button is clicked", () => {
         const settingsStorageMock = setupSettingsStorageMock(
-          NewTokenButton.addToken
+          NewTokenButton.addTokenManually
         )
-        const addTokenSpy = jest.spyOn(tokens, "addToken")
-        initialize()
+        const addTokenManuallySpy = jest.spyOn(tokens, "addTokenManually")
+        void initialize()
 
         settingsStorageMock.setItem(
-          NewTokenButton.addToken,
+          NewTokenButton.addTokenManually,
           SOME_STRINGIFIED_JSON
         )
 
-        expect(addTokenSpy).toBeCalled()
-        addTokenSpy.mockRestore()
+        expect(addTokenManuallySpy).toBeCalled()
+        addTokenManuallySpy.mockRestore()
+      })
+
+      it("should call the function to add the token if a QR tag image was provided", () => {
+        const settingsStorageMock = setupSettingsStorageMock(
+          NewTokenButton.addTokenViaQrTag,
+          SOME_PICKED_IMAGE_VALUE
+        )
+        const addTokenFromQrTagSpy = jest
+          .spyOn(tokens, "addTokenFromQrTag")
+          .mockImplementation(jest.fn())
+        void initialize()
+
+        settingsStorageMock.setItem(
+          NewTokenButton.addTokenViaQrTag,
+          SOME_PICKED_IMAGE_VALUE
+        )
+
+        expect(addTokenFromQrTagSpy).toBeCalledWith(SOME_IMAGE_URI)
+        addTokenFromQrTagSpy.mockRestore()
+      })
+
+      it("does not call the function to add tokens if the settings changes are unrelated", () => {
+        const settingsStorageMock = setupSettingsStorageMock(
+          NewTokenButton.addTokenManually
+        )
+        const addTokenFromQrTagSpy = jest
+          .spyOn(tokens, "addTokenFromQrTag")
+          .mockImplementation()
+        void initialize()
+
+        settingsStorageMock.setItem("someOtherKey", '{"name": "someValue"}')
+
+        expect(addTokenFromQrTagSpy).not.toBeCalled()
+        addTokenFromQrTagSpy.mockRestore()
       })
 
       it("resets the new token fields and validation messages if the reset button is clicked", () => {
         const settingsStorageMock = setupSettingsStorageMock(
           NewTokenButton.reset
         )
-        initialize()
+        void initialize()
         const clearValidationsSpy = jest.spyOn(
           validation,
-          "clearAllValidationMessages"
+          "clearAllValidationMessagesForManualTokens"
         )
         const clearFieldsSpy = jest.spyOn(
           fields,
@@ -149,11 +217,18 @@ describe("companion", () => {
         const settingsStorageMock = jest.mocked(settings).settingsStorage
         settingsStorageMock.addEventListener.mockImplementation(
           (_: string, handler: (event: StorageChangeEvent) => void) => {
-            settingsStorageMock.setItem.mockImplementation((key: string) => {
-              if (key === eventKey) {
-                handler(changeEvent)
+            settingsStorageMock.setItem.mockImplementation(
+              (key: string, value: string) => {
+                settingsStorageMock.getItem.mockImplementation(getKey => {
+                  if (getKey === key) {
+                    return value
+                  }
+                })
+                if (key === eventKey) {
+                  handler(changeEvent)
+                }
               }
-            })
+            )
           }
         )
         return settingsStorageMock

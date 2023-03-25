@@ -1,8 +1,19 @@
 import { gettext } from "i18n"
 import { TotpConfig } from "../companion/tokens"
-import { getDisplayName, UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "./ui"
+import { NewTokenButton } from "../companion/ui/NewTokenButton"
+import {
+  getDisplayName,
+  getValidationMessageSetting,
+  UPDATE_DISPLAY_NAME_SETTINGS_KEY
+} from "./ui"
+import ValidationMessage from "./ValidationMessage"
 
 export function SectionTokens({ settingsStorage }) {
+  /** Edge length in pixels of the image to be processed by the QR code scanner.
+   * Note that increasing above 400 lead to unusable recognition rates and
+   * beyond 600 might crash the Companion app. */
+  const IMAGE_EDGE_LENGTH = 300
+
   return (
     <Section
       title={
@@ -27,7 +38,26 @@ export function SectionTokens({ settingsStorage }) {
             }
           />
         )}
-        addAction={<Text> </Text>} // To hide the button, since the entries are currently added via a form
+        onListChange={() =>
+          settingsStorage.removeItem(
+            getValidationMessageSetting(NewTokenButton.addTokenViaQrTag)
+          )
+        }
+        addAction={
+          <ImagePicker
+            label={gettext("Add token via QR tag")}
+            pickerTitle={gettext("Import QR tag from an image")}
+            pickerImageTitle={gettext("Current QR tag image.")}
+            pickerLabel={gettext("Import new QR tag")}
+            settingsKey={NewTokenButton.addTokenViaQrTag}
+            imageWidth={IMAGE_EDGE_LENGTH}
+            imageHeight={IMAGE_EDGE_LENGTH}
+          />
+        }
+      />
+      <ValidationMessage
+        settingsStorage={settingsStorage}
+        componentName={NewTokenButton.addTokenViaQrTag}
       />
     </Section>
   )
