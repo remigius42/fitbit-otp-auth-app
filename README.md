@@ -7,3 +7,9 @@ passwords
 (TOTP)](https://en.wikipedia.org/wiki/Time-based_one-time_password) on
 your Fitbit device (currently Versa 3 and Sense) either by scanning a QR
 code within the app settings or by entering the TOTP settings manually.
+
+## Contributing
+
+Thanks for your interest in contributing! There are many ways to contribute to
+this project. Get started by having a look at
+[CONTRIBUTING.md](./CONTRIBUTING.md).
