@@ -45,6 +45,30 @@ module.exports = {
         "@typescript-eslint/unbound-method": "off",
         "jest/unbound-method": "error"
       }
+    },
+    {
+      files: ["./app/**/*.{js,ts}"],
+      parserOptions: {
+        project: ["./app/tsconfig.json"]
+      }
+    },
+    {
+      files: ["./common/**/*.{js,ts}"],
+      parserOptions: {
+        project: ["./common/tsconfig.json"]
+      }
+    },
+    {
+      files: ["./companion/**/*.{js,ts}"],
+      parserOptions: {
+        project: ["./companion/tsconfig.json"]
+      }
+    },
+    {
+      files: ["./settings/**/*.{js,jsx,ts,tsx}"],
+      parserOptions: {
+        project: ["./settings/tsconfig.json"]
+      }
     }
   ]
 }

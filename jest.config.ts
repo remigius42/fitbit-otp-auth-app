@@ -1,7 +1,14 @@
 import type { Config } from "jest"
 
 const config: Config = {
-  preset: "ts-jest",
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: "<rootDir>/test/tsconfig.json"
+      }
+    ]
+  },
   collectCoverage: true,
   collectCoverageFrom: [
     "<rootDir>/{app,common,companion,resources,settings}/**/*.{ts,js}"

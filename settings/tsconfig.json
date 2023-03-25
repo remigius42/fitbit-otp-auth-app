@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es6"],
+    "noEmit": true,
+    "checkJs": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.tsx",
+    "**/*.jsx",
+    "../node_modules/fitbit-sdk-types/types/settings"
+  ]
+}

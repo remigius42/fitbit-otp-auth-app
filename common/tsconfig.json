@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es6"],
+    "noEmit": true,
+    "checkJs": true
+  },
+  "include": ["**/*.ts", "**/*.js"]
+}
