@@ -26,7 +26,8 @@ const LINT_STAGED_CONFIG = {
   "**/*.{ts,tsx,js,jsx}": async files => {
     const filesToLint = await filterOutESLintIgnores(files)
     return mapFilesToInvocations("eslint --max-warnings=0", filesToLint)
-  }
+  },
+  "**/*.css": files => mapFilesToInvocations("stylelint", files)
 }
 
 /**

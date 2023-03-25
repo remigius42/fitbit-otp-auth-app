@@ -1,0 +1,13 @@
+plugins:
+  - stylelint-no-indistinguishable-colors
+extends:
+  - stylelint-config-standard
+  - stylelint-config-prettier
+rules:
+  plugin/stylelint-no-indistinguishable-colors: true
+  color-hex-length: long
+  property-no-unknown:
+    - true
+    - ignoreProperties:
+        - text-length
+  font-family-no-missing-generic-family-keyword: null # Fitbit only supports the values "System-Regular", "System-Light", "System-Bold" and no generic names, see https://dev.fitbit.com/build/guides/user-interface/css/#fonts
