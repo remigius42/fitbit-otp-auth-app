@@ -2,12 +2,17 @@ import type { MessageEvent } from "messaging"
 import { peerSocket } from "messaging"
 import { PeerMessage } from "../common/PeerMessage"
 import { TokenManager } from "./TokenManager"
-import { showNoTokensAvailableMessage, showTokens } from "./ui"
+import {
+  registerDelayedMessageWhetherDeviceIsConnected,
+  showNoTokensAvailableMessage,
+  showTokens
+} from "./ui"
 
 const tokenManager = new TokenManager()
 
 export function initialize() {
   registerPeerSocketListener()
+  registerDelayedMessageWhetherDeviceIsConnected()
   tokenManager.registerObserver(tokensAvailableObserver)
 }
 

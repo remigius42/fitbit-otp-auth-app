@@ -15,6 +15,7 @@ import { TokenManager } from "../TokenManager"
 import * as ui from "../ui"
 
 describe("app", () => {
+  beforeAll(() => jest.useFakeTimers())
   afterEach(() => {
     jest.restoreAllMocks()
 
@@ -52,6 +53,17 @@ describe("app", () => {
           SOME_UPDATE_TOKENS_MESSAGE
         )
       })
+    })
+
+    it("registers a delayed message suggesting to check connectivity", () => {
+      const registerDelayedMessageWhetherDeviceIsConnectedSpy = jest.spyOn(
+        ui,
+        "registerDelayedMessageWhetherDeviceIsConnected"
+      )
+
+      initialize()
+
+      expect(registerDelayedMessageWhetherDeviceIsConnectedSpy).toBeCalled()
     })
 
     describe("registers an observer on the tokenManager which", () => {

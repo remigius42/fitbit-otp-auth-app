@@ -5,3 +5,7 @@
 .background-fill {
   fill: fb-black;
 }
+
+#retrieving-tokens-connection-issue {
+  display: none;
+}

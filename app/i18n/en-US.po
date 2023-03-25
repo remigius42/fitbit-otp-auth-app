@@ -6,3 +6,6 @@ msgstr "Please add tokens in this app's settings within the Fitbit app."
 
 msgid "Retrieving tokens..."
 msgstr "Retrieving tokens..."
+
+msgid "Retrieving tokens... Is your device connected?"
+msgstr "Retrieving tokens... Is your device connected?"

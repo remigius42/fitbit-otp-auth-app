@@ -6,3 +6,6 @@ msgstr "Bitte fügen Sie Token in den Einstellungen dieser App in der Fitbit-App
 
 msgid "Retrieving tokens..."
 msgstr "Token werden geladen..."
+
+msgid "Retrieving tokens... Is your device connected?"
+msgstr "Token werden geladen... Ist Ihr Gerät verbunden?"
