@@ -19,6 +19,9 @@ msgstr "Current QR tag image."
 msgid "Display name"
 msgstr "Display name"
 
+msgid "Enlarge token information"
+msgstr "Enlarge token information"
+
 msgid "Import new QR tag"
 msgstr "Import new QR tag"
 

@@ -1,3 +1,4 @@
+import { AppSettings } from "./AppSettings"
 import type { TotpConfig } from "./TotpConfig"
 
 export interface UpdateTokensStartMessage {
@@ -26,4 +27,9 @@ export type UpdateTokensMessage =
   | UpdateTokensTokenMessage
   | UpdateTokensEndMessage
 
-export type PeerMessage = UpdateTokensMessage
+export interface UpdateSettingsMessage {
+  type: "UPDATE_SETTINGS_MESSAGE"
+  updatedSettings: Partial<AppSettings>
+}
+
+export type PeerMessage = UpdateTokensMessage | UpdateSettingsMessage

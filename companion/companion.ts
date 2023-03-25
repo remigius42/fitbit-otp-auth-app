@@ -2,8 +2,10 @@ import { settingsStorage } from "settings"
 import type { TotpConfig } from "../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
+  sendSettingsWhenDeviceIsReady,
   sendTokensToDevice,
-  sendTokensWhenDeviceIsReady
+  sendTokensWhenDeviceIsReady,
+  updateSettings
 } from "./peerMessaging"
 import { fallbackToDefaultSettings } from "./settings"
 import {
@@ -33,6 +35,7 @@ export async function initialize() {
   }
   addSettingsChangeListener()
   sendTokensWhenDeviceIsReady()
+  sendSettingsWhenDeviceIsReady()
 }
 
 function addSettingsChangeListener() {
@@ -65,6 +68,10 @@ function addSettingsChangeListener() {
       sendCurrentTokensToDevice()
     } else if (key === SettingsButton.storeTokensOnDevice) {
       sendCurrentTokensToDevice()
+    } else if (key === SettingsButton.showEnlargedTokensView) {
+      updateSettings({
+        shouldUseLargeTokenView: JSON.parse(newValue) as boolean
+      })
     }
   })
 }

@@ -1,6 +1,9 @@
 import { documentMockFactory } from "../__mocks__/document"
 jest.doMock("document", documentMockFactory, { virtual: true })
 
+import { fsMockFactory } from "../__mocks__/fs"
+jest.doMock("fs", fsMockFactory, { virtual: true })
+
 import {
   messagingMockFactory,
   PeerSocketMock
@@ -10,9 +13,10 @@ jest.doMock("messaging", messagingMockFactory, { virtual: true })
 jest.doMock("clock", () => ({}), { virtual: true })
 
 import * as messaging from "messaging"
-import { PeerMessage } from "../../common/PeerMessage"
+import { PeerMessage, UpdateTokensMessage } from "../../common/PeerMessage"
 import type { TotpConfig } from "../../common/TotpConfig"
 import { initialize } from "../app"
+import { SettingsManager } from "../SettingsManager"
 import { TokenManager } from "../TokenManager"
 import * as ui from "../ui"
 
@@ -39,9 +43,88 @@ describe("app", () => {
     })
 
     describe("adds a peerSocket listener which", () => {
-      it("dispatches to the TokenManager upon receiving a message", () => {
-        const SOME_UPDATE_TOKENS_MESSAGE = { type: "UPDATE_TOKENS_END_MESSAGE" }
-        const SOME_MESSAGE = { data: SOME_UPDATE_TOKENS_MESSAGE }
+      const TOKEN_UPDATE_MESSAGES: Array<UpdateTokensMessage> = [
+        { type: "UPDATE_TOKENS_START_MESSAGE", count: 0 },
+        {
+          type: "UPDATE_TOKENS_TOKEN_MESSAGE",
+          index: 0,
+          token: {
+            label: "some label",
+            secret: "some secret",
+            algorithm: "some algorithm",
+            period: "some period",
+            digits: "some digits"
+          }
+        },
+        {
+          type: "UPDATE_TOKENS_END_MESSAGE"
+        }
+      ]
+
+      it.each(TOKEN_UPDATE_MESSAGES)(
+        "dispatches to the token manager upon receiving an update token message of type $type",
+        (updateTokenMessage: UpdateTokensMessage) => {
+          const peerSocketMock = jest.mocked(messaging).peerSocket
+          initialize()
+          const handleUpdateTokensMessageSpy = jest.spyOn(
+            TokenManager.prototype,
+            "handleUpdateTokensMessage"
+          )
+
+          ;(peerSocketMock as unknown as PeerSocketMock).receive({
+            data: updateTokenMessage
+          })
+
+          expect(handleUpdateTokensMessageSpy).toBeCalledWith(
+            updateTokenMessage
+          )
+        }
+      )
+
+      it.each(TOKEN_UPDATE_MESSAGES)(
+        "does not dispatch to the settings manager upon receiving an update token message of type $type",
+        (updateTokenMessage: UpdateTokensMessage) => {
+          const peerSocketMock = jest.mocked(messaging).peerSocket
+          initialize()
+          const handleUpdateSettingsMessageSpy = jest.spyOn(
+            SettingsManager.prototype,
+            "updateSettings"
+          )
+
+          ;(peerSocketMock as unknown as PeerSocketMock).receive({
+            data: updateTokenMessage
+          })
+
+          expect(handleUpdateSettingsMessageSpy).not.toBeCalled()
+        }
+      )
+
+      it("dispatches to the settings manager upon receiving an update settings message", () => {
+        const SOME_UPDATE_SETTINGS_MESSAGE = {
+          type: "UPDATE_SETTINGS_MESSAGE",
+          updatedSettings: {}
+        }
+        const SOME_MESSAGE = { data: SOME_UPDATE_SETTINGS_MESSAGE }
+        const peerSocketMock = jest.mocked(messaging).peerSocket
+        initialize()
+        const handleUpdateSettingsMessageSpy = jest.spyOn(
+          SettingsManager.prototype,
+          "updateSettings"
+        )
+
+        ;(peerSocketMock as unknown as PeerSocketMock).receive(SOME_MESSAGE)
+
+        expect(handleUpdateSettingsMessageSpy).toBeCalledWith(
+          SOME_UPDATE_SETTINGS_MESSAGE
+        )
+      })
+
+      it("does not dispatch to the token manager upon receiving an update settings message", () => {
+        const SOME_UPDATE_SETTINGS_MESSAGE = {
+          type: "UPDATE_SETTINGS_MESSAGE",
+          updatedSettings: {}
+        }
+        const SOME_MESSAGE = { data: SOME_UPDATE_SETTINGS_MESSAGE }
         const peerSocketMock = jest.mocked(messaging).peerSocket
         initialize()
         const handleUpdateTokensMessageSpy = jest.spyOn(
@@ -51,9 +134,7 @@ describe("app", () => {
 
         ;(peerSocketMock as unknown as PeerSocketMock).receive(SOME_MESSAGE)
 
-        expect(handleUpdateTokensMessageSpy).toBeCalledWith(
-          SOME_UPDATE_TOKENS_MESSAGE
-        )
+        expect(handleUpdateTokensMessageSpy).not.toBeCalled()
       })
     })
 
@@ -68,67 +149,67 @@ describe("app", () => {
       expect(registerDelayedMessageWhetherDeviceIsConnectedSpy).toBeCalled()
     })
 
-    describe("registers an observer on the tokenManager which", () => {
-      const SOME_TOKEN: TotpConfig = {
-        label: "some label",
-        secret: "some secret",
-        algorithm: "some algorithm",
-        digits: "some digits",
-        period: "some period"
-      }
+    it("registers an observer on the settings manager which triggers a UI update", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      initialize()
+      const updateUiSpy = jest.spyOn(ui, "updateUi")
 
-      it("invokes the function to show the tokens if the token manager has any", () => {
+      ;(peerSocketMock as unknown as PeerSocketMock).receive({
+        data: { type: "UPDATE_SETTINGS_MESSAGE", updatedSettings: {} }
+      })
+
+      expect(updateUiSpy).toBeCalled()
+    })
+
+    it("invokes method on settings manager to restore the settings", () => {
+      const restoreSettingsSpy = jest.spyOn(
+        SettingsManager.prototype,
+        "restoreSettings"
+      )
+
+      initialize()
+
+      expect(restoreSettingsSpy).toBeCalled()
+    })
+
+    describe("registers an observer on the token manager which", () => {
+      it("triggers a UI update", () => {
+        const SOME_TOKEN: TotpConfig = {
+          label: "some label",
+          secret: "some secret",
+          algorithm: "some algorithm",
+          digits: "some digits",
+          period: "some period"
+        }
         const peerSocketMock = jest.mocked(messaging).peerSocket
         initialize()
-        const showTokensSpy = jest.spyOn(ui, "showTokens")
+        const updateUiSpy = jest.spyOn(ui, "updateUi")
 
         receiveTokenUpdate(peerSocketMock as unknown as PeerSocketMock, [
           SOME_TOKEN
         ])
 
-        expect(showTokensSpy).toBeCalled()
+        expect(updateUiSpy).toBeCalled()
       })
 
-      it("invokes the function to show the no tokens available message if the token manager doesn't have any tokens", () => {
-        const peerSocketMock = jest.mocked(messaging).peerSocket
+      it("is registered before the token manager tries to restore the tokens", () => {
+        const observedCalls = []
+        const registerObserver = "registerObserver"
+        jest
+          .spyOn(TokenManager.prototype, registerObserver)
+          .mockImplementation(() => observedCalls.push(registerObserver))
+        const tryRestoreFromDevice = "tryRestoreFromDevice"
+        jest
+          .spyOn(TokenManager.prototype, tryRestoreFromDevice)
+          .mockImplementation(() => observedCalls.push(tryRestoreFromDevice))
+
         initialize()
-        receiveTokenUpdate(peerSocketMock as unknown as PeerSocketMock, [
-          SOME_TOKEN
+
+        expect(observedCalls).toStrictEqual([
+          registerObserver,
+          tryRestoreFromDevice
         ])
-        const showNoTokensAvailableMessageSpy = jest.spyOn(
-          ui,
-          "showNoTokensAvailableMessage"
-        )
-
-        receiveTokenUpdate(peerSocketMock as unknown as PeerSocketMock, [])
-
-        expect(showNoTokensAvailableMessageSpy).toBeCalled()
       })
-
-      function receiveTokenUpdate(
-        peerSocketMock: PeerSocketMock,
-        tokens: Array<TotpConfig>
-      ) {
-        const START_MESSAGE: PeerMessage = {
-          type: "UPDATE_TOKENS_START_MESSAGE",
-          count: tokens.length
-        }
-        peerSocketMock.receive({ data: START_MESSAGE })
-
-        tokens.forEach((token, index) => {
-          const TOKEN_MESSAGE: PeerMessage = {
-            type: "UPDATE_TOKENS_TOKEN_MESSAGE",
-            index,
-            token
-          }
-          peerSocketMock.receive({ data: TOKEN_MESSAGE })
-        })
-
-        const END_MESSAGE: PeerMessage = {
-          type: "UPDATE_TOKENS_END_MESSAGE"
-        }
-        peerSocketMock.receive({ data: END_MESSAGE })
-      }
     })
 
     it("invokes method on token manager to try to restore the tokens", () => {
@@ -141,5 +222,30 @@ describe("app", () => {
 
       expect(tryRestoreFromDeviceSpy).toBeCalled()
     })
+
+    function receiveTokenUpdate(
+      peerSocketMock: PeerSocketMock,
+      tokens: Array<TotpConfig>
+    ) {
+      const START_MESSAGE: PeerMessage = {
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: tokens.length
+      }
+      peerSocketMock.receive({ data: START_MESSAGE })
+
+      tokens.forEach((token, index) => {
+        const TOKEN_MESSAGE: PeerMessage = {
+          type: "UPDATE_TOKENS_TOKEN_MESSAGE",
+          index,
+          token
+        }
+        peerSocketMock.receive({ data: TOKEN_MESSAGE })
+      })
+
+      const END_MESSAGE: PeerMessage = {
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      }
+      peerSocketMock.receive({ data: END_MESSAGE })
+    }
   })
 })

@@ -6,10 +6,13 @@ jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
 import * as messaging from "messaging"
 import * as settings from "settings"
+import { AppSettings } from "../../common/AppSettings"
 import type { TotpConfig } from "../../common/TotpConfig"
 import {
+  sendSettingsWhenDeviceIsReady,
   sendTokensToDevice,
-  sendTokensWhenDeviceIsReady
+  sendTokensWhenDeviceIsReady,
+  updateSettings
 } from "../peerMessaging"
 import { TOKENS_SETTINGS_KEY } from "../tokens"
 import { SettingsButton } from "../ui/SettingsButton"
@@ -25,6 +28,8 @@ describe("peerMessaging", () => {
       } else if (key === SettingsButton.compensateClockDrift) {
         return "true"
       } else if (key === SettingsButton.storeTokensOnDevice) {
+        return "false"
+      } else if (key === SettingsButton.showEnlargedTokensView) {
         return "false"
       }
     })
@@ -47,6 +52,10 @@ describe("peerMessaging", () => {
   }
   const SOME_TOKENS = [SOME_FIRST_TOKEN, SOME_SECOND_TOKEN]
   const SOME_JSON_STRINGIFIED_TOKENS = JSON.stringify(SOME_TOKENS)
+
+  const SOME_SETTINGS_UPDATE: Partial<AppSettings> = {
+    shouldUseLargeTokenView: true
+  }
 
   describe("sendTokensWhenDeviceIsReady", () => {
     it("sends the current tokens as soon the device is ready", () => {
@@ -94,6 +103,34 @@ describe("peerMessaging", () => {
       expect(peerSocketMock.send).toBeCalledWith({
         type: "UPDATE_TOKENS_END_MESSAGE"
       })
+    })
+  })
+
+  describe("sendSettingsWhenDeviceIsReady", () => {
+    it("sends the settings as soon the device is ready", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      sendSettingsWhenDeviceIsReady()
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+
+      const expectedSettings = {
+        shouldUseLargeTokenView: JSON.parse(
+          settingsStorageMock.getItem(SettingsButton.showEnlargedTokensView)
+        ) as boolean
+      }
+      expect(peerSocketMock.send).toBeCalledWith({
+        type: "UPDATE_SETTINGS_MESSAGE",
+        updatedSettings: expectedSettings
+      })
+    })
+
+    it("does not send the settings if the device is not ready", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+
+      sendSettingsWhenDeviceIsReady()
+
+      expect(peerSocketMock.send).not.toBeCalled()
     })
   })
 
@@ -288,6 +325,29 @@ describe("peerMessaging", () => {
       const peerSocketMock = jest.mocked(messaging).peerSocket
 
       sendTokensToDevice(SOME_TOKENS)
+
+      expect(peerSocketMock.send).not.toBeCalled()
+      expect(peerSocketMock.readyState).toBe(peerSocketMock.CLOSED)
+    })
+  })
+
+  describe("updateSettings", () => {
+    it("sends an update settings message to the device", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+
+      updateSettings(SOME_SETTINGS_UPDATE)
+
+      expect(peerSocketMock.send).toBeCalledWith({
+        type: "UPDATE_SETTINGS_MESSAGE",
+        updatedSettings: SOME_SETTINGS_UPDATE
+      })
+    })
+
+    it("does not send the settings if the device is not ready", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+
+      updateSettings(SOME_SETTINGS_UPDATE)
 
       expect(peerSocketMock.send).not.toBeCalled()
       expect(peerSocketMock.readyState).toBe(peerSocketMock.CLOSED)

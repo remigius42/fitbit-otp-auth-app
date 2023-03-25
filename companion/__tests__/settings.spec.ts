@@ -37,6 +37,18 @@ describe("settings", () => {
         "false"
       )
     })
+
+    it("does not use the enlarged tokens view by default", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(() => null)
+
+      fallbackToDefaultSettings()
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        SettingsButton.showEnlargedTokensView,
+        "false"
+      )
+    })
   })
 
   describe("isCompensatingClockDrift", () => {

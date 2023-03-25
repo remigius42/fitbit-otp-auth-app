@@ -118,6 +118,44 @@ describe("companion", () => {
       sendTokensWhenDeviceIsReadySpy.mockRestore()
     })
 
+    it("sends the settings to the device when it is ready", () => {
+      const sendSettingsWhenDeviceIsReadySpy = jest.spyOn(
+        peerMessaging,
+        "sendSettingsWhenDeviceIsReady"
+      )
+
+      void initialize()
+
+      expect(sendSettingsWhenDeviceIsReadySpy).toBeCalled()
+      sendSettingsWhenDeviceIsReadySpy.mockRestore()
+    })
+
+    /* The app installs an observer on the settings which will trigger a UI update. Sending the settings first will show the no tokens available view, because at the first UI update the tokens haven't been sent yet. */
+    it("sends the settings after the tokens have been sent to prevent a missing tokens message", () => {
+      const observedCalls = []
+      const sendTokensWhenDeviceIsReady = "sendTokensWhenDeviceIsReady"
+      const sendTokensWhenDeviceIsReadySpy = jest
+        .spyOn(peerMessaging, "sendTokensWhenDeviceIsReady")
+        .mockImplementation(() =>
+          observedCalls.push(sendTokensWhenDeviceIsReady)
+        )
+      const sendSettingsWhenDeviceIsReady = "sendSettingsWhenDeviceIsReady"
+      const sendSettingsWhenDeviceIsReadySpy = jest
+        .spyOn(peerMessaging, "sendSettingsWhenDeviceIsReady")
+        .mockImplementation(() =>
+          observedCalls.push(sendSettingsWhenDeviceIsReady)
+        )
+
+      void initialize()
+
+      expect(observedCalls).toStrictEqual([
+        sendTokensWhenDeviceIsReady,
+        sendSettingsWhenDeviceIsReady
+      ])
+      sendSettingsWhenDeviceIsReadySpy.mockRestore()
+      sendTokensWhenDeviceIsReadySpy.mockRestore()
+    })
+
     describe("adds settings change listener which", () => {
       const SOME_TOKEN: TotpConfig = {
         label: "some label",
@@ -341,6 +379,25 @@ describe("companion", () => {
         settingsStorageMock.setItem(SettingsButton.storeTokensOnDevice, "true")
 
         expect(sendTokensToDeviceSpy).toBeCalled()
+      })
+
+      it("sends the settings update to the device if the large tokens view setting is changed", () => {
+        const NEW_VALUE = true
+        const settingsStorageMock = setupSettingsStorageMock(
+          SettingsButton.showEnlargedTokensView,
+          JSON.stringify(NEW_VALUE)
+        )
+        const updateSettingsSpy = jest.spyOn(peerMessaging, "updateSettings")
+        void initialize()
+
+        settingsStorageMock.setItem(
+          SettingsButton.showEnlargedTokensView,
+          JSON.stringify(NEW_VALUE)
+        )
+
+        expect(updateSettingsSpy).toBeCalledWith({
+          shouldUseLargeTokenView: NEW_VALUE
+        })
       })
 
       function setupSettingsStorageMock(

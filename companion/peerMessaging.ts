@@ -1,9 +1,11 @@
 import * as messaging from "messaging"
 import { settingsStorage } from "settings"
+import { AppSettings } from "../common/AppSettings"
 import { PeerMessage } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
 import { isCompensatingClockDrift, isStoringTokensOnDevice } from "./settings"
 import { TOKENS_SETTINGS_KEY } from "./tokens"
+import { SettingsButton } from "./ui/SettingsButton"
 
 export function sendTokensWhenDeviceIsReady() {
   messaging.peerSocket.addEventListener("open", () => {
@@ -14,6 +16,17 @@ export function sendTokensWhenDeviceIsReady() {
         ? (JSON.parse(currentStringifiedTokens) as Array<TotpConfig>)
         : []
     )
+  })
+}
+
+export function sendSettingsWhenDeviceIsReady() {
+  messaging.peerSocket.addEventListener("open", () => {
+    const currentSettings: AppSettings = {
+      shouldUseLargeTokenView: JSON.parse(
+        settingsStorage.getItem(SettingsButton.showEnlargedTokensView)
+      ) as boolean
+    }
+    updateSettings(currentSettings)
   })
 }
 
@@ -44,6 +57,10 @@ export function sendTokensToDevice(tokens: Array<TotpConfig>) {
   )
 
   sendMessageToDevice({ type: "UPDATE_TOKENS_END_MESSAGE" })
+}
+
+export function updateSettings(updatedSettings: Partial<AppSettings>) {
+  sendMessageToDevice({ type: "UPDATE_SETTINGS_MESSAGE", updatedSettings })
 }
 
 function sendMessageToDevice(message: PeerMessage) {

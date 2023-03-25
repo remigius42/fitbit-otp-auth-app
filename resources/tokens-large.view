@@ -1,0 +1,28 @@
+<svg class="application-fill">
+  <rect width="100%" height="100%" class="background-fill" />
+
+  <use id="token-list" href="#tile-list">
+    <var id="virtual" value="1" />
+    <var id="reorder-enabled" value="0" />
+    <var id="peek-enabled" value="1" />
+    <var id="separator-height-bottom" value="0" />
+
+    <use id="token-list-item-pool" href="#tile-list-pool">
+      <use id="token-list-item-pool[0]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[1]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[2]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[3]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[4]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[5]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[6]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[7]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[8]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[9]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[10]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[11]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[12]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[13]" href="#token-list-item--large" />
+      <use id="token-list-item-pool[14]" href="#token-list-item--large" />
+    </use>
+  </use>
+</svg>

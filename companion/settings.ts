@@ -13,6 +13,9 @@ export function fallbackToDefaultSettings() {
   if (settingsStorage.getItem(SettingsButton.storeTokensOnDevice) === null) {
     settingsStorage.setItem(SettingsButton.storeTokensOnDevice, "false")
   }
+  if (settingsStorage.getItem(SettingsButton.showEnlargedTokensView) === null) {
+    settingsStorage.setItem(SettingsButton.showEnlargedTokensView, "false")
+  }
 }
 
 export function isCompensatingClockDrift() {

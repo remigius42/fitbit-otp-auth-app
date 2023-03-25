@@ -19,6 +19,11 @@ export default function SectionSettings() {
         settingsKey={SettingsButton.storeTokensOnDevice}
         label={gettext("Store tokens on device")}
       />
+
+      <Toggle
+        settingsKey={SettingsButton.showEnlargedTokensView}
+        label={gettext("Enlarge token information")}
+      />
     </Section>
   )
 }

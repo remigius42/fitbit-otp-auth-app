@@ -35,3 +35,20 @@
 .token-list-item > .token-separator {
   fill: #704d00;
 }
+
+.token-list-item--large {
+  height: 150;
+}
+
+.token-list-item--large > text {
+  text-anchor: start;
+  x: 20;
+}
+
+.token-list-item--large > .totp {
+  font-size: 56;
+}
+
+.token-list-item--large > .display-name {
+  font-size: 36;
+}

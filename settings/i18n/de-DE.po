@@ -1,4 +1,4 @@
-# spellchecker:words tokenalgorithmus, uhrenfehler
+# spellchecker:words tokenalgorithmus, tokenansicht, uhrenfehler
 
 msgid "Add token"
 msgstr "Token hinzufügen"
@@ -20,6 +20,9 @@ msgstr "Aktuelles QR-Tag Bild."
 
 msgid "Display name"
 msgstr "Anzeigename"
+
+msgid "Enlarge token information"
+msgstr "Vergrösserte Tokenansicht"
 
 msgid "Import new QR tag"
 msgstr "Neues QR-Tag importieren"
