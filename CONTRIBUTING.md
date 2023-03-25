@@ -34,7 +34,7 @@ deployment.
 
 ### Setup instructions
 
-1. `git clone git@github.com:remigius42/fitbit-totp-authenticator` to clone the repository.
+1. `git clone git@github.com:remigius42/fitbit-otp-auth-app` to clone the repository.
 2. `npm install` to install the dependencies.
 3. Install the recommended extensions in Visual Studio Code by opening
    the repository and confirming the installation in the automatic
