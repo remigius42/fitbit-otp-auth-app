@@ -1,5 +1,5 @@
 <svg class="application-fill">
   <rect width="100%" height="100%" class="background-fill" />
   <textarea class="p1 horizontal-pad center-text">
-    _Retrieving tokens...</textarea>
+      TODO: show tokens</textarea>
 </svg>

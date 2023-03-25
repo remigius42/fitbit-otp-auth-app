@@ -4,9 +4,13 @@ jest.doMock("settings", settingsMockFactory, { virtual: true })
 import { i18nMockFactory } from "../__mocks__/i18n"
 jest.doMock("i18n", i18nMockFactory, { virtual: true })
 
+import { messagingMockFactory } from "../__mocks__/messaging"
+jest.doMock("messaging", messagingMockFactory, { virtual: true })
+
 import * as settings from "settings"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../../settings/ui"
 import { initialize } from "../companion"
+import * as peerMessaging from "../peerMessaging"
 import * as tokens from "../tokens"
 import * as fields from "../ui/fields"
 import { NewTokenButton } from "../ui/NewTokenButton"
@@ -76,16 +80,29 @@ describe("companion", () => {
       )
     })
 
+    it("sends the tokens to the device when it is ready", () => {
+      const sendTokensWhenDeviceIsReadySpy = jest.spyOn(
+        peerMessaging,
+        "sendTokensWhenDeviceIsReady"
+      )
+
+      void initialize()
+
+      expect(sendTokensWhenDeviceIsReadySpy).toBeCalled()
+      sendTokensWhenDeviceIsReadySpy.mockRestore()
+    })
+
     describe("adds settings change listener which", () => {
+      const SOME_TOKEN: tokens.TotpConfig = {
+        label: "some label",
+        issuer: "some issuer",
+        secret: "some secret",
+        algorithm: "some algorithm",
+        digits: "some digits",
+        period: "some period"
+      }
+
       it("invokes updateDisplayName if its corresponding setting is updated", () => {
-        const SOME_TOKEN: tokens.TotpConfig = {
-          label: "some label",
-          issuer: "some issuer",
-          secret: "some secret",
-          algorithm: "some algorithm",
-          digits: "some digits",
-          period: "some period"
-        }
         const NEW_DISPLAY_NAME = "some new display name"
         const DISPLAY_NAME_UPDATE = JSON.stringify({
           token: SOME_TOKEN,
@@ -127,39 +144,83 @@ describe("companion", () => {
         }
       )
 
-      it("invokes addToken function if the add token button is clicked", () => {
-        const settingsStorageMock = setupSettingsStorageMock(
-          NewTokenButton.addTokenManually
-        )
-        const addTokenManuallySpy = jest.spyOn(tokens, "addTokenManually")
-        void initialize()
+      describe("when the add token button is clicked", () => {
+        it("invokes addToken function", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenManually
+          )
+          const addTokenManuallySpy = jest.spyOn(tokens, "addTokenManually")
+          void initialize()
 
-        settingsStorageMock.setItem(
-          NewTokenButton.addTokenManually,
-          SOME_STRINGIFIED_JSON
-        )
+          settingsStorageMock.setItem(
+            NewTokenButton.addTokenManually,
+            SOME_STRINGIFIED_JSON
+          )
 
-        expect(addTokenManuallySpy).toBeCalled()
-        addTokenManuallySpy.mockRestore()
+          expect(addTokenManuallySpy).toBeCalled()
+          addTokenManuallySpy.mockRestore()
+        })
+
+        it("sends the current tokens to the device", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenManually
+          )
+          const sendTokensToDeviceSpy = jest.spyOn(
+            peerMessaging,
+            "sendTokensToDevice"
+          )
+          void initialize()
+
+          settingsStorageMock.setItem(
+            NewTokenButton.addTokenManually,
+            SOME_STRINGIFIED_JSON
+          )
+
+          expect(sendTokensToDeviceSpy).toBeCalledWith([SOME_TOKEN])
+          sendTokensToDeviceSpy.mockRestore()
+        })
       })
 
-      it("should call the function to add the token if a QR tag image was provided", () => {
-        const settingsStorageMock = setupSettingsStorageMock(
-          NewTokenButton.addTokenViaQrTag,
-          SOME_PICKED_IMAGE_VALUE
-        )
-        const addTokenFromQrTagSpy = jest
-          .spyOn(tokens, "addTokenFromQrTag")
-          .mockImplementation(jest.fn())
-        void initialize()
+      describe("when a QR tag image was provided", () => {
+        it("invokes addTokenFromQrTag function", () => {
+          const SOME_IMAGE_URI = "some URI"
+          const updateValue = JSON.stringify({ imageUri: SOME_IMAGE_URI })
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenViaQrTag,
+            updateValue
+          )
+          const addTokenFromQrTagSpy = jest
+            .spyOn(tokens, "addTokenFromQrTag")
+            .mockResolvedValue()
+          void initialize()
 
-        settingsStorageMock.setItem(
-          NewTokenButton.addTokenViaQrTag,
-          SOME_PICKED_IMAGE_VALUE
-        )
+          settingsStorageMock.setItem(
+            NewTokenButton.addTokenViaQrTag,
+            updateValue
+          )
 
-        expect(addTokenFromQrTagSpy).toBeCalledWith(SOME_IMAGE_URI)
-        addTokenFromQrTagSpy.mockRestore()
+          expect(addTokenFromQrTagSpy).toBeCalledWith(SOME_IMAGE_URI)
+          addTokenFromQrTagSpy.mockRestore()
+        })
+
+        it("sends the current tokens to the device", () => {
+          const settingsStorageMock = setupSettingsStorageMock(
+            NewTokenButton.addTokenManually
+          )
+          const sendTokensToDeviceSpy = jest.spyOn(
+            peerMessaging,
+            "sendTokensToDevice"
+          )
+          void initialize()
+
+          settingsStorageMock.setItem(
+            NewTokenButton.addTokenManually,
+            SOME_STRINGIFIED_JSON
+          )
+
+          expect(sendTokensToDeviceSpy).toBeCalledWith([SOME_TOKEN])
+          sendTokensToDeviceSpy.mockRestore()
+        })
       })
 
       it("does not call the function to add tokens if the settings changes are unrelated", () => {
@@ -199,6 +260,28 @@ describe("companion", () => {
         clearValidationsSpy.mockRestore()
       })
 
+      it("sends updates of the tokens setting to the device", () => {
+        const SOME_STRINGIFIED_ARRAY = '["some array element"]'
+        const settingsStorageMock = setupSettingsStorageMock(
+          tokens.TOKENS_SETTINGS_KEY,
+          SOME_STRINGIFIED_ARRAY
+        )
+        const sendTokensToDeviceSpy = jest.spyOn(
+          peerMessaging,
+          "sendTokensToDevice"
+        )
+        void initialize()
+
+        settingsStorageMock.setItem(
+          tokens.TOKENS_SETTINGS_KEY,
+          SOME_STRINGIFIED_ARRAY
+        )
+
+        expect(sendTokensToDeviceSpy).toBeCalledWith(
+          JSON.parse(SOME_STRINGIFIED_ARRAY)
+        )
+      })
+
       function setupSettingsStorageMock(
         eventKey: string,
         newValue = '"some new value JSON"'
@@ -215,6 +298,11 @@ describe("companion", () => {
           stopPropagation: undefined
         }
         const settingsStorageMock = jest.mocked(settings).settingsStorage
+        settingsStorageMock.getItem.mockImplementation(key => {
+          if (key === tokens.TOKENS_SETTINGS_KEY) {
+            return JSON.stringify([SOME_TOKEN])
+          }
+        })
         settingsStorageMock.addEventListener.mockImplementation(
           (_: string, handler: (event: StorageChangeEvent) => void) => {
             settingsStorageMock.setItem.mockImplementation(
@@ -222,6 +310,8 @@ describe("companion", () => {
                 settingsStorageMock.getItem.mockImplementation(getKey => {
                   if (getKey === key) {
                     return value
+                  } else if (getKey === tokens.TOKENS_SETTINGS_KEY) {
+                    return JSON.stringify([SOME_TOKEN])
                   }
                 })
                 if (key === eventKey) {

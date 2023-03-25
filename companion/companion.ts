@@ -1,8 +1,13 @@
 import { settingsStorage } from "settings"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
+  sendTokensToDevice,
+  sendTokensWhenDeviceIsReady
+} from "./peerMessaging"
+import {
   addTokenFromQrTag,
   addTokenManually,
+  TOKENS_SETTINGS_KEY,
   TotpConfig,
   updateDisplayName,
   validateNewManualToken
@@ -24,6 +29,7 @@ export async function initialize() {
     await addTokenFromImage()
   }
   addSettingsChangeListener()
+  sendTokensWhenDeviceIsReady()
 }
 
 function addSettingsChangeListener() {
@@ -34,6 +40,7 @@ function addSettingsChangeListener() {
         value: { name: string }
       }
       updateDisplayName(update.token, update.value.name)
+      sendCurrentTokensToDevice()
     } else if (
       NewTokenFieldNameValues.map(name => String(name)).indexOf(key) !== -1
     ) {
@@ -41,12 +48,16 @@ function addSettingsChangeListener() {
         NewTokenFieldNameValues.find(fieldName => String(fieldName) === key)
       )
     } else if (key === NewTokenButton.addTokenViaQrTag) {
-      void addTokenFromImage()
+      void addTokenFromImage().then(sendCurrentTokensToDevice)
     } else if (key === NewTokenButton.addTokenManually) {
       addTokenManually()
+      sendCurrentTokensToDevice()
     } else if (key === NewTokenButton.reset) {
       clearAddTokenManuallyFieldsViaSettings()
       clearAllValidationMessagesForManualTokens()
+    } else if (key === TOKENS_SETTINGS_KEY) {
+      const tokens = JSON.parse(newValue) as Array<TotpConfig>
+      sendTokensToDevice(tokens)
     }
   })
 }
@@ -55,4 +66,12 @@ function addTokenFromImage() {
   const pickedImage = settingsStorage.getItem(NewTokenButton.addTokenViaQrTag)
   const { imageUri } = JSON.parse(pickedImage) as { imageUri: string }
   return addTokenFromQrTag(imageUri)
+}
+
+function sendCurrentTokensToDevice() {
+  const currentTokens = settingsStorage.getItem(TOKENS_SETTINGS_KEY)
+  if (currentTokens) {
+    const tokens = JSON.parse(currentTokens) as Array<TotpConfig>
+    sendTokensToDevice(tokens)
+  }
 }
