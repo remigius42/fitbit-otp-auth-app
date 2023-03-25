@@ -8,6 +8,7 @@ import { formatTotp, getDisplayName } from "../../../common/formatTokens"
 import type { TotpConfig } from "../../../common/TotpConfig"
 import { TokenManager } from "../../TokenManager"
 import {
+  CLOCK_SYNCHRONIZATION_MESSAGE_ID,
   DISPLAY_NAME_TEXT_ID,
   PROGRESS_ID,
   TOKEN_LIST_ID,
@@ -16,6 +17,7 @@ import {
 import {
   INVISIBLE_UPDATE_MARGIN,
   setupTokenList,
+  showClockSynchronizationMessage,
   TokenListTileInfo,
   TOKEN_LIST_TILE_TYPE,
   updateTokenList
@@ -657,6 +659,95 @@ token for a tile which had its token deleted. */
         .mockReturnValue(lastVisibleTile)
 
       return { configureTileSpy, firstVisibleTileSpy, lastVisibleTileSpy }
+    }
+  })
+
+  describe("showClockSynchronizationMessage", () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => {
+      jest.runAllTimers()
+      jest.useRealTimers()
+    })
+
+    describe("if the message element can be found and is not shown", () => {
+      it("shows the message", () => {
+        const getElementByIdSpy = buildDocumentSpyWithMessageElement()
+        const messageElement = document.getElementById(
+          CLOCK_SYNCHRONIZATION_MESSAGE_ID
+        ) as GraphicsElement
+        expect(messageElement.style.display).toBe("none")
+
+        showClockSynchronizationMessage()
+
+        expect(messageElement.style.display).toBe("inline")
+        getElementByIdSpy.mockRestore()
+      })
+
+      it("triggers the message animation", () => {
+        const getElementByIdSpy = buildDocumentSpyWithMessageElement()
+        const messageElement = document.getElementById(
+          CLOCK_SYNCHRONIZATION_MESSAGE_ID
+        ) as GraphicsElement
+        expect(messageElement.style.display).toBe("none")
+
+        showClockSynchronizationMessage()
+
+        expect(messageElement.animate).toBeCalledWith("enable")
+        getElementByIdSpy.mockRestore()
+      })
+
+      it("registers a timeout which hides the element", () => {
+        const getElementByIdSpy = buildDocumentSpyWithMessageElement()
+        const messageElement = document.getElementById(
+          CLOCK_SYNCHRONIZATION_MESSAGE_ID
+        ) as GraphicsElement
+        showClockSynchronizationMessage()
+        expect(messageElement.style.display).toBe("inline")
+
+        jest.advanceTimersToNextTimer()
+
+        expect(messageElement.style.display).toBe("none")
+        getElementByIdSpy.mockRestore()
+      })
+    })
+
+    describe("does not register a timeout", () => {
+      it("if the message element cannot be found", () => {
+        const setTimeoutSpy = jest.spyOn(globalThis, "setTimeout")
+
+        showClockSynchronizationMessage()
+
+        expect(setTimeoutSpy).not.toBeCalled()
+        setTimeoutSpy.mockRestore()
+      })
+
+      it("the message is already being shown", () => {
+        const getElementByIdSpy = buildDocumentSpyWithMessageElement()
+        showClockSynchronizationMessage() // invoke before spying to show show the message
+        const setTimeoutSpy = jest.spyOn(globalThis, "setTimeout")
+
+        showClockSynchronizationMessage()
+
+        expect(setTimeoutSpy).not.toBeCalled()
+        setTimeoutSpy.mockRestore()
+        getElementByIdSpy.mockRestore()
+      })
+    })
+
+    function buildDocumentSpyWithMessageElement() {
+      const messageElementStub = {
+        style: {
+          display: "none"
+        },
+        animate: jest.fn()
+      } as unknown as GraphicsElement
+      const getElementByIdSpy = jest.spyOn(document, "getElementById")
+      getElementByIdSpy.mockImplementation(id => {
+        if (id === CLOCK_SYNCHRONIZATION_MESSAGE_ID) {
+          return messageElementStub
+        }
+      })
+      return getElementByIdSpy
     }
   })
 

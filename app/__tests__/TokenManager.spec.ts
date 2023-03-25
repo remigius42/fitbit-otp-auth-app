@@ -54,6 +54,56 @@ describe("TokenManager", () => {
       expect(someOtherObserver).toBeCalled()
     })
 
+    describe("does not notify of clock drift if", () => {
+      it("the clock drift of the valid update sequence is zero", () => {
+        const tokenManager = new TokenManager()
+        const someObserver = jest.fn()
+        tokenManager.registerObserver(someObserver)
+
+        addTokensToTokenManager(tokenManager, [SOME_TOKEN])
+
+        expect(someObserver).toBeCalledWith(tokenManager, false)
+      })
+
+      it("the clock drift is below 1 second", () => {
+        const SECONDS_SINCE_EPOCH_IN_COMPANION = 42
+        const SECONDS_SINCE_EPOCH_IN_DEVICE = 42.5
+        jest.useFakeTimers()
+        jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+        const tokenManager = new TokenManager()
+        const someObserver = jest.fn()
+        tokenManager.registerObserver(someObserver)
+
+        addTokensToTokenManager(
+          tokenManager,
+          [SOME_TOKEN],
+          SECONDS_SINCE_EPOCH_IN_COMPANION
+        )
+
+        expect(someObserver).toBeCalledWith(tokenManager, false)
+        jest.useRealTimers()
+      })
+    })
+
+    it("does notify of clock drift if the clock drift is 0.75 seconds or more", () => {
+      const SECONDS_SINCE_EPOCH_IN_COMPANION = 42
+      const SECONDS_SINCE_EPOCH_IN_DEVICE = 42.75
+      jest.useFakeTimers()
+      jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+      const tokenManager = new TokenManager()
+      const someObserver = jest.fn()
+      tokenManager.registerObserver(someObserver)
+
+      addTokensToTokenManager(
+        tokenManager,
+        [SOME_TOKEN],
+        SECONDS_SINCE_EPOCH_IN_COMPANION
+      )
+
+      expect(someObserver).toBeCalledWith(tokenManager, true)
+      jest.useRealTimers()
+    })
+
     it("clears the tokens if the update sequence does not contain tokens", () => {
       const tokenManager = new TokenManager()
       addTokensToTokenManager(tokenManager, [SOME_TOKEN])

@@ -4,6 +4,9 @@ msgstr "Could not retrieve the tokens. Is your device connected with your phone?
 msgid "Please add tokens in this app's settings within the Fitbit app."
 msgstr "Please add tokens in this app's settings within the Fitbit app."
 
+msgid "Synchronizing clock..."
+msgstr "Synchronizing clock..."
+
 msgid "Retrieving tokens..."
 msgstr "Retrieving tokens..."
 

@@ -25,4 +25,6 @@
       <use id="token-list-item-pool[14]" href="#token-list-item--large" />
     </use>
   </use>
+
+  <use id="clock-synchronization-message" href="#clock-synchronization-message" />
 </svg>

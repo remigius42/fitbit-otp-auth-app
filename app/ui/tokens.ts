@@ -3,6 +3,7 @@ import { formatTotp, getDisplayName } from "../../common/formatTokens"
 import type { TotpConfig } from "../../common/TotpConfig"
 import { TokenManager } from "../TokenManager"
 import {
+  CLOCK_SYNCHRONIZATION_MESSAGE_ID,
   DISPLAY_NAME_TEXT_ID,
   PROGRESS_ID,
   TOKEN_LIST_ID,
@@ -19,6 +20,8 @@ export const TOKEN_LIST_TILE_TYPE = "token-list-item-pool"
 export const INVISIBLE_UPDATE_MARGIN = 3
 /** References to the tiles of the virtual list. This is a workaround because `tokenList.redraw`, `tokenList.updateTile` and invoking `show({ redraw: true})` on the individual tiles seemed to have no effect. */
 const tiles: Array<VirtualTileListItem> = []
+
+let isShowingClockSynchronizationMessage: boolean
 
 export function setupTokenList(tokenManager: TokenManager) {
   const tokenList = document.getElementById(
@@ -75,6 +78,22 @@ export function updateTokenList(tokenManager: TokenManager) {
       tiles[i],
       tokenList.delegate.getTileInfo(i)
     )
+  }
+}
+
+export function showClockSynchronizationMessage() {
+  const messageElement = document.getElementById(
+    CLOCK_SYNCHRONIZATION_MESSAGE_ID
+  ) as GraphicsElement
+
+  if (messageElement && !isShowingClockSynchronizationMessage) {
+    isShowingClockSynchronizationMessage = true
+    messageElement.style.display = "inline"
+    messageElement.animate("enable")
+    setTimeout(() => {
+      messageElement.style.display = "none"
+      isShowingClockSynchronizationMessage = false
+    }, 3500)
   }
 }
 

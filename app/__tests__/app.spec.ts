@@ -20,10 +20,12 @@ import { SettingsManager } from "../SettingsManager"
 import { TokenManager } from "../TokenManager"
 import * as ui from "../ui"
 import * as colors from "../ui/colors"
+import * as tokens from "../ui/tokens"
 
 describe("app", () => {
   beforeAll(() => jest.useFakeTimers())
   afterEach(() => {
+    jest.clearAllTimers()
     jest.restoreAllMocks()
 
     const peerSocketMock = jest.mocked(messaging).peerSocket
@@ -198,43 +200,87 @@ describe("app", () => {
     })
 
     describe("registers an observer on the token manager which", () => {
-      it("triggers a UI update", () => {
-        const SOME_TOKEN: TotpConfig = {
-          label: "some label",
-          secret: "some secret",
-          algorithm: "some algorithm",
-          digits: "some digits",
-          period: "some period"
+      it.each([true, false])(
+        "triggers a UI update if the clock drift flag is %s",
+        wasClockDriftChanged => {
+          const SECONDS_SINCE_EPOCH_IN_DEVICE = 42
+          const CLOCK_DRIFT_SECONDS = 23
+          jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+          const SOME_TOKEN: TotpConfig = {
+            label: "some label",
+            secret: "some secret",
+            algorithm: "some algorithm",
+            digits: "some digits",
+            period: "some period"
+          }
+          const peerSocketMock = jest.mocked(messaging).peerSocket
+          initialize()
+          const updateUiSpy = jest.spyOn(ui, "updateUi")
+
+          receiveTokenUpdate(
+            peerSocketMock as unknown as PeerSocketMock,
+            [SOME_TOKEN],
+            /* trigger both cases by conditionally injecting a clock drift*/
+            wasClockDriftChanged
+              ? SECONDS_SINCE_EPOCH_IN_DEVICE + CLOCK_DRIFT_SECONDS
+              : SECONDS_SINCE_EPOCH_IN_DEVICE
+          )
+
+          expect(updateUiSpy).toBeCalled()
         }
-        const peerSocketMock = jest.mocked(messaging).peerSocket
-        initialize()
-        const updateUiSpy = jest.spyOn(ui, "updateUi")
+      )
+    })
 
-        receiveTokenUpdate(peerSocketMock as unknown as PeerSocketMock, [
-          SOME_TOKEN
-        ])
+    it("registers an observer on the token manager which shows the clock synchronization message if the clock drift changed", () => {
+      const SECONDS_SINCE_EPOCH_IN_DEVICE = 42
+      const CLOCK_DRIFT_SECONDS = 23
+      jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+      const SOME_TOKEN: TotpConfig = {
+        label: "some label",
+        secret: "some secret",
+        algorithm: "some algorithm",
+        digits: "some digits",
+        period: "some period"
+      }
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      initialize()
+      const showClockSynchronizationMessageSpy = jest.spyOn(
+        tokens,
+        "showClockSynchronizationMessage"
+      )
 
-        expect(updateUiSpy).toBeCalled()
-      })
+      receiveTokenUpdate(
+        peerSocketMock as unknown as PeerSocketMock,
+        [SOME_TOKEN],
+        SECONDS_SINCE_EPOCH_IN_DEVICE + CLOCK_DRIFT_SECONDS
+      )
 
-      it("is registered before the token manager tries to restore the tokens", () => {
-        const observedCalls = []
-        const registerObserver = "registerObserver"
-        jest
-          .spyOn(TokenManager.prototype, registerObserver)
-          .mockImplementation(() => observedCalls.push(registerObserver))
-        const tryRestoreFromDevice = "tryRestoreFromDevice"
-        jest
-          .spyOn(TokenManager.prototype, tryRestoreFromDevice)
-          .mockImplementation(() => observedCalls.push(tryRestoreFromDevice))
+      expect(showClockSynchronizationMessageSpy).toBeCalled()
+    })
 
-        initialize()
+    it("registers observers before the token manager tries to restore the tokens", () => {
+      const observedCalls = []
+      const registerObserver = "registerObserver"
+      jest
+        .spyOn(TokenManager.prototype, registerObserver)
+        .mockImplementation(() => observedCalls.push(registerObserver))
+      const tryRestoreFromDevice = "tryRestoreFromDevice"
+      jest
+        .spyOn(TokenManager.prototype, tryRestoreFromDevice)
+        .mockImplementation(() => observedCalls.push(tryRestoreFromDevice))
 
-        expect(observedCalls).toStrictEqual([
-          registerObserver,
-          tryRestoreFromDevice
-        ])
-      })
+      initialize()
+
+      expect(observedCalls).toContain(registerObserver)
+      expect(observedCalls).toContain(tryRestoreFromDevice)
+      // all calls to registerObserver precede tryRestoreFromDevice
+      expect(
+        observedCalls
+          .filter(call => call === registerObserver)
+          .every(
+            (_, index) => index < observedCalls.indexOf(tryRestoreFromDevice)
+          )
+      ).toBe(true)
     })
 
     it("invokes method on token manager to try to restore the tokens", () => {
@@ -250,11 +296,13 @@ describe("app", () => {
 
     function receiveTokenUpdate(
       peerSocketMock: PeerSocketMock,
-      tokens: Array<TotpConfig>
+      tokens: Array<TotpConfig>,
+      secondsSinceEpochInCompanion: number = undefined
     ) {
       const START_MESSAGE: PeerMessage = {
         type: "UPDATE_TOKENS_START_MESSAGE",
-        count: tokens.length
+        count: tokens.length,
+        secondsSinceEpochInCompanion
       }
       peerSocketMock.receive({ data: START_MESSAGE })
 

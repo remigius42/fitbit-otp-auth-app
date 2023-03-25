@@ -5,6 +5,7 @@ import { SettingsManager } from "./SettingsManager"
 import { TokenManager } from "./TokenManager"
 import { registerDelayedMessageWhetherDeviceIsConnected, updateUi } from "./ui"
 import { updateColors } from "./ui/colors"
+import { showClockSynchronizationMessage } from "./ui/tokens"
 
 const tokenManager = new TokenManager()
 const settingsManager = new SettingsManager()
@@ -21,6 +22,11 @@ export function initialize() {
   tokenManager.registerObserver(
     (tokenManager: TokenManager) => void updateUi(tokenManager, settingsManager)
   )
+  tokenManager.registerObserver((_, wasClockDriftChanged) => {
+    if (wasClockDriftChanged) {
+      showClockSynchronizationMessage()
+    }
+  })
   tokenManager.tryRestoreFromDevice()
 }
 

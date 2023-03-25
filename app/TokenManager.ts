@@ -7,7 +7,10 @@ import type {
 import type { TotpConfig } from "../common/TotpConfig"
 import { currentPeriod, totp } from "./totp"
 
-type TokenManagerObserver = (tokenManager: TokenManager) => void
+type TokenManagerObserver = (
+  tokenManager: TokenManager,
+  wasClockDriftChangedSignificantly: boolean
+) => void
 
 export class TokenManager {
   private readonly tokens: Array<TotpConfig> = []
@@ -28,10 +31,8 @@ export class TokenManager {
         this.updateTokensBuffer.handleEndMessage()
         if (this.updateTokensBuffer.wasUpdateSuccessful()) {
           this.updateTokens()
-          this.notifyObservers()
-          this.passwordCache.setClockDrift(
-            this.updateTokensBuffer.getClockDrift()
-          )
+          this.notifyObservers(this.didClockDriftChangeSignificantly())
+          this.updateClockDrift()
           if (this.updateTokensBuffer.shouldStoreTokens()) {
             this.storeTokensOnDevice()
           }
@@ -87,8 +88,26 @@ export class TokenManager {
       .forEach(token => this.tokens.push(token))
   }
 
-  private notifyObservers() {
-    this.observers.forEach(observer => observer(this))
+  private didClockDriftChangeSignificantly() {
+    const CLOCK_DRIFT_SECONDS_THRESHOLD = 0.75
+    const keepClockDriftCompensationEnabled = (tokenManager: TokenManager) =>
+      tokenManager.updateTokensBuffer.getClockDrift() !== 0
+
+    return (
+      keepClockDriftCompensationEnabled(this) &&
+      Math.abs(
+        this.passwordCache.getClockDrift() -
+          this.updateTokensBuffer.getClockDrift()
+      ) >= CLOCK_DRIFT_SECONDS_THRESHOLD
+    )
+  }
+
+  private updateClockDrift() {
+    this.passwordCache.setClockDrift(this.updateTokensBuffer.getClockDrift())
+  }
+
+  private notifyObservers(wasClockDriftChanged = false) {
+    this.observers.forEach(observer => observer(this, wasClockDriftChanged))
   }
 
   private storeTokensOnDevice() {

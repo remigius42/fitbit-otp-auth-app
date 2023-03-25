@@ -15,6 +15,11 @@
   display: none;
 }
 
+#clock-synchronization-message {
+  display: none;
+  pointer-events: none; /* paint above but still allow scrolling the list below */
+}
+
 .token-list-item {
   height: 90;
   display: none;
