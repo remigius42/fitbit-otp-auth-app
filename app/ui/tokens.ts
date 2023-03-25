@@ -2,6 +2,7 @@ import document from "document"
 import { formatTotp, getDisplayName } from "../../common/formatTokens"
 import type { TotpConfig } from "../../common/TotpConfig"
 import { TokenManager } from "../TokenManager"
+import { totp } from "../totp"
 import {
   DISPLAY_NAME_TEXT_ID,
   PROGRESS_ID,
@@ -40,7 +41,7 @@ export function setupTokenList(tokenManager: TokenManager) {
         const token = info.value.token
 
         if (token) {
-          tile.getElementById(TOTP_TEXT_ID).text = formatTotp("12345678")
+          tile.getElementById(TOTP_TEXT_ID).text = formatTotp(totp(token))
           tile.getElementById(DISPLAY_NAME_TEXT_ID).text = getDisplayName(token)
           setProgressIndicator(tile, token.period)
         }

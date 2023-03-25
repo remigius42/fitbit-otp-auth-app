@@ -1,8 +1,10 @@
+/* spell-checker:ignore MJUXILTMPEXTEWRWMNFEITY */
+
 import { documentMockFactory } from "../../__mocks__/document"
 jest.doMock("document", documentMockFactory, { virtual: true })
 
 import document from "document"
-import { getDisplayName } from "../../../common/formatTokens"
+import { formatTotp, getDisplayName } from "../../../common/formatTokens"
 import type { TotpConfig } from "../../../common/TotpConfig"
 import { TokenManager } from "../../TokenManager"
 import {
@@ -18,15 +20,16 @@ import {
   TOKEN_LIST_TILE_TYPE,
   updateTokenList
 } from "../tokens"
+import { totp } from "../../totp"
 
 describe("tokens", () => {
   const SOME_TOKEN: TotpConfig = {
     label: "some label",
     issuer: "some issuer",
     displayName: "some displayName",
-    secret: "some secret",
-    algorithm: "some algorithm",
-    digits: "some digits",
+    secret: "MJUXILTMPEXTEWRWMNFEITY",
+    algorithm: "SHA1",
+    digits: "6",
     period: "42"
   }
 
@@ -130,7 +133,9 @@ describe("tokens", () => {
 
           delegate.configureTile(tileMock, SOME_TILE_INFO)
 
-          expect(totpTextSetterMock).toBeCalledWith("1234 5678")
+          expect(totpTextSetterMock).toBeCalledWith(
+            formatTotp(totp(SOME_TOKEN))
+          )
         })
 
         it("sets the display name", () => {
