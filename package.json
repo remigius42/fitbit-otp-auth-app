@@ -5,7 +5,8 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@fitbit/sdk": "~6.1.0",
-    "@fitbit/sdk-cli": "^1.7.3"
+    "@fitbit/sdk-cli": "^1.7.3",
+    "husky": "^8.0.3"
   },
   "fitbit": {
     "appUUID": "8e1ff1dc-5118-4f53-bad5-fccfef64058c",
@@ -23,6 +24,7 @@
   },
   "scripts": {
     "build": "fitbit-build",
-    "debug": "fitbit"
+    "debug": "fitbit",
+    "prepare": "husky install"
   }
 }

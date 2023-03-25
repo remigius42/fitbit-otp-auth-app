@@ -33,6 +33,12 @@ deployment.
 3. Install the recommended extensions in Visual Studio Code by opening
    the repository and confirming the installation in the automatic
    recommended extensions message.
+4. If you are using a GUI for Git, please make sure that the Git
+   configuration core.hooksPath is supported. Otherwise you might be
+   able to workaround this issue via
+   `rm -rf .git/hooks && ln -s ../.husky .git/hooks`
+   (see a related [Husky issue comment](https://github.com/typicode/husky/issues/875#issue-809587895)
+   for further details).
 
 ## Common development tasks
 
