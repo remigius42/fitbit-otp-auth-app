@@ -38,3 +38,9 @@ msgstr "Tokenalgorithmus auswählen"
 
 msgid "Third-party licenses"
 msgstr "Lizenzen von Drittanbietern"
+
+msgid "Tokens"
+msgid "Token"
+
+msgid "Tokens section description"
+msgstr "Sie können Anzeigenamen für die Token festlegen, indem Sie auf die Listeneinträge klicken. Um die Token auf die ursprüngliche Bezeichnung und Aussteller zurückzusetzen, klicken Sie auf den Eintrag, löschen sie den Anzeigenamen und speichern Sie."

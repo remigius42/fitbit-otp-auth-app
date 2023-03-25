@@ -1,23 +1,40 @@
-import { gettext } from "i18n"
 import base32decode from "base32-decode"
+import { gettext } from "i18n"
+import { settingsStorage } from "settings"
+import { getDisplayName, getValidationMessageSetting } from "../settings/ui"
+import { gettextWithReplacement } from "./i18nUtils"
 import {
   clearAddTokenManuallyFieldsViaSettings,
   getSingleSelectValueFromSettings,
   getTextFieldValueFromSettings
 } from "./ui/fields"
+import { NewTokenButton } from "./ui/NewTokenButton"
 import {
   NewTokenFieldName,
   NewTokenFieldNameValues
 } from "./ui/NewTokenFieldName"
-import { updateValidationForField } from "./ui/validation"
+import {
+  clearAllValidationMessages,
+  updateValidationForField
+} from "./ui/validation"
+
+export const TOKENS_SETTINGS_KEY = "tokens"
 
 export function addToken() {
   const { tokenConfig, validationErrors } = validateNewToken()
 
   if (validationErrors.size === 0) {
-    clearAddTokenManuallyFieldsViaSettings()
-    // TODO: store new token based on tokenConfig
-    console.log("adding token config:", tokenConfig) // eslint-disable-line
+    const matchingExistingToken = getMatchingExistingToken(tokenConfig)
+    if (!matchingExistingToken) {
+      clearAddTokenManuallyFieldsViaSettings()
+      clearAllValidationMessages()
+      addTokenToSettings(tokenConfig)
+    } else {
+      settingsStorage.setItem(
+        getValidationMessageSetting(NewTokenButton.addToken),
+        getErrorMessageForDuplicateToken(matchingExistingToken)
+      )
+    }
   }
 }
 
@@ -33,6 +50,65 @@ export function validateNewToken(fieldName?: NewTokenFieldName) {
   }
 
   return { tokenConfig, validationErrors }
+}
+
+const isConsideredSameToken = (tokenA: TotpConfig, tokenB: TotpConfig) =>
+  tokenA.label === tokenB.label && tokenA.issuer === tokenB.issuer
+
+export function getMatchingExistingToken(newTokenConfig: TotpConfig) {
+  const tokens = getTokensFromSettings()
+
+  return tokens.find(token => isConsideredSameToken(token, newTokenConfig))
+}
+
+export function addTokenToSettings(tokenConfig: TotpConfig) {
+  const tokens = getTokensFromSettings()
+  tokens.push(tokenConfig)
+  settingsStorage.setItem(TOKENS_SETTINGS_KEY, JSON.stringify(tokens))
+}
+
+export function getErrorMessageForDuplicateToken(
+  matchingExistingToken: TotpConfig
+) {
+  const tokens = getTokensFromSettings()
+  const tokenIndex = tokens.findIndex(token =>
+    isConsideredSameToken(token, matchingExistingToken)
+  )
+  const conflictingToken = tokens[tokenIndex]
+  return gettextWithReplacement(
+    "Error: Token with same label and issuer already exists",
+    "@token_list_reference",
+    `#${tokenIndex + 1}: ${getDisplayName(conflictingToken, true)}`
+  )
+}
+
+export function updateDisplayName(
+  targetToken: TotpConfig,
+  displayName: string
+) {
+  const tokens = getTokensFromSettings()
+  const token = tokens.find(token => isConsideredSameToken(token, targetToken))
+  const displayNameDiffersFromDefault = (
+    token: TotpConfig,
+    displayName: string
+  ) => displayName !== getDisplayName({ ...token, displayName: undefined })
+
+  if (token) {
+    if (displayNameDiffersFromDefault(token, displayName)) {
+      token.displayName = displayName
+    } else {
+      token.displayName = undefined
+    }
+    settingsStorage.setItem(TOKENS_SETTINGS_KEY, JSON.stringify(tokens))
+  }
+}
+
+function getTokensFromSettings() {
+  const tokensSetting = settingsStorage.getItem(TOKENS_SETTINGS_KEY)
+  const parsedTokenSetting: Array<TotpConfig> = tokensSetting
+    ? (JSON.parse(tokensSetting) as Array<TotpConfig>)
+    : []
+  return parsedTokenSetting
 }
 
 function mapTokenFieldsToTotpConfig() {
@@ -64,7 +140,8 @@ function validateConfig(config: TotpConfigInput) {
     ) {
       validationErrors.set(
         NewTokenFieldName.issuer,
-        gettext("Error: Issuer should match label issuer prefix").replace(
+        gettextWithReplacement(
+          "Error: Issuer should match label issuer prefix",
           "@issuer_prefix",
           optionalIssuerLabelPrefix
         )
@@ -123,4 +200,8 @@ interface TotpConfigInput {
   algorithm: string
   digits: string
   period: string
+}
+
+export interface TotpConfig extends TotpConfigInput {
+  displayName?: string
 }

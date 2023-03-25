@@ -23,3 +23,6 @@ msgstr "Schlüssel kann nicht dekodiert werden"
 
 msgid "Error: Secret must not be empty"
 msgstr "Schlüssel darf nicht leer sein"
+
+msgid "Error: Token with same label and issuer already exists"
+msgstr "Token mit gleicher Bezeichnung und Aussteller existiert bereits. Entfernen Sie zuerst dieses Token (@token_list_reference)."

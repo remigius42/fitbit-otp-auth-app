@@ -1,4 +1,6 @@
 import { settingsStorage } from "settings"
+import { getValidationMessageSetting } from "../../settings/ui"
+import { NewTokenButton } from "./NewTokenButton"
 import { NewTokenFieldName, NewTokenFieldNameValues } from "./NewTokenFieldName"
 
 export function updateValidationForField(
@@ -15,12 +17,15 @@ export function updateValidationForField(
   }
 }
 
+export function clearAllValidationMessages() {
+  clearValidationForAllFields()
+  settingsStorage.removeItem(
+    getValidationMessageSetting(NewTokenButton.addToken)
+  )
+}
+
 export function clearValidationForAllFields() {
   NewTokenFieldNameValues.forEach(fieldName =>
     settingsStorage.removeItem(getValidationMessageSetting(fieldName))
   )
-}
-
-export function getValidationMessageSetting(fieldName: NewTokenFieldName) {
-  return fieldName + "Error"
 }

@@ -21,3 +21,6 @@ msgstr "Secret cannot be decoded"
 
 msgid "Error: Secret must not be empty"
 msgstr "Secret must not be empty"
+
+msgid "Error: Token with same label and issuer already exists"
+msgstr "Token with same label and issuer already exists. Delete the existing one first (@token_list_reference)."

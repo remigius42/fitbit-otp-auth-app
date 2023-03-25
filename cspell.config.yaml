@@ -27,7 +27,8 @@ ignoreWords:
   - rseidelsohn
   - tsdoc
 import: ["@cspell/dict-de-ch/cspell-ext.json"]
-flagWords: []
+flagWords:
+  - topt # spellchecker: disable-line
 overrides:
   - filename: "**/i18n/de-DE.po"
     dictionaries: ["!!de-ch"]

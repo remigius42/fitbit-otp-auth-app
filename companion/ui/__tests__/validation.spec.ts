@@ -2,13 +2,15 @@ import { settingsMockFactory } from "../../__mocks__/settings"
 jest.doMock("settings", settingsMockFactory, { virtual: true })
 
 import * as settings from "settings"
+import { getValidationMessageSetting } from "../../../settings/ui"
+import { NewTokenButton } from "../NewTokenButton"
 import {
   NewTokenFieldName,
   NewTokenFieldNameValues
 } from "../NewTokenFieldName"
 import {
+  clearAllValidationMessages,
   clearValidationForAllFields,
-  getValidationMessageSetting,
   updateValidationForField
 } from "../validation"
 
@@ -58,8 +60,25 @@ describe("validation", () => {
     })
   })
 
+  describe("clearAllValidationMessages", () => {
+    it("should remove settings entries for all validation messages", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+
+      clearAllValidationMessages()
+
+      NewTokenFieldNameValues.forEach(fieldName =>
+        expect(settingsStorageMock.removeItem).toBeCalledWith(
+          getValidationErrorSetting(fieldName)
+        )
+      )
+      expect(settingsStorageMock.removeItem).toBeCalledWith(
+        getValidationMessageSetting(NewTokenButton.addToken)
+      )
+    })
+  })
+
   describe("clearValidationForAllFields", () => {
-    it("should remove the settings entries for all validation messages", () => {
+    it("should remove the settings entries for all field validation messages", () => {
       const settingsStorageMock = jest.mocked(settings).settingsStorage
 
       clearValidationForAllFields()
@@ -69,16 +88,6 @@ describe("validation", () => {
           getValidationErrorSetting(fieldName)
         )
       )
-    })
-  })
-
-  describe("getValidationMessageSetting", () => {
-    it("should use the given field name and append the 'Error' suffix", () => {
-      const SOME_FIELD_NAME = NewTokenFieldName.issuer
-
-      const settingKey = getValidationMessageSetting(SOME_FIELD_NAME)
-
-      expect(settingKey).toBe(SOME_FIELD_NAME + "Error")
     })
   })
 

@@ -5,6 +5,7 @@ import { i18nMockFactory } from "../__mocks__/i18n"
 jest.doMock("i18n", i18nMockFactory, { virtual: true })
 
 import * as settings from "settings"
+import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../../settings/ui"
 import { initialize } from "../companion"
 import * as tokens from "../tokens"
 import * as fields from "../ui/fields"
@@ -22,15 +23,15 @@ describe("companion", () => {
     const SOME_STRINGIFIED_JSON = '"some stringified JSON"'
 
     it("calls function to clear all validation messages", () => {
-      const clearValidationForAllFieldsSpy = jest.spyOn(
+      const clearAllValidationMessagesSpy = jest.spyOn(
         validation,
-        "clearValidationForAllFields"
+        "clearAllValidationMessages"
       )
 
       initialize()
 
-      expect(clearValidationForAllFieldsSpy).toBeCalled()
-      clearValidationForAllFieldsSpy.mockRestore()
+      expect(clearAllValidationMessagesSpy).toBeCalled()
+      clearAllValidationMessagesSpy.mockRestore()
     })
 
     it("adds a settings change listener", () => {
@@ -45,6 +46,39 @@ describe("companion", () => {
     })
 
     describe("adds settings change listener which", () => {
+      it("invokes updateDisplayName if its corresponding setting is updated", () => {
+        const SOME_TOKEN: tokens.TotpConfig = {
+          label: "some label",
+          issuer: "some issuer",
+          secret: "some secret",
+          algorithm: "some algorithm",
+          digits: "some digits",
+          period: "some period"
+        }
+        const NEW_DISPLAY_NAME = "some new display name"
+        const DISPLAY_NAME_UPDATE = JSON.stringify({
+          token: SOME_TOKEN,
+          value: { name: NEW_DISPLAY_NAME }
+        })
+        const settingsStorageMock = setupSettingsStorageMock(
+          UPDATE_DISPLAY_NAME_SETTINGS_KEY,
+          DISPLAY_NAME_UPDATE
+        )
+        const updateDisplayNameSpy = jest.spyOn(tokens, "updateDisplayName")
+        initialize()
+
+        settingsStorageMock.setItem(
+          UPDATE_DISPLAY_NAME_SETTINGS_KEY,
+          DISPLAY_NAME_UPDATE
+        )
+
+        expect(updateDisplayNameSpy).toBeCalledWith(
+          SOME_TOKEN,
+          NEW_DISPLAY_NAME
+        )
+        updateDisplayNameSpy.mockRestore()
+      })
+
       it.each(NewTokenFieldNameValues)(
         "triggers the validation if new token field %s changes",
         (fieldName: NewTokenFieldName) => {
@@ -79,31 +113,32 @@ describe("companion", () => {
         const settingsStorageMock = setupSettingsStorageMock(
           NewTokenButton.reset
         )
+        initialize()
         const clearValidationsSpy = jest.spyOn(
           validation,
-          "clearValidationForAllFields"
+          "clearAllValidationMessages"
         )
         const clearFieldsSpy = jest.spyOn(
           fields,
           "clearAddTokenManuallyFieldsViaSettings"
         )
-        initialize()
 
         settingsStorageMock.setItem(NewTokenButton.reset, SOME_STRINGIFIED_JSON)
 
-        expect(clearValidationsSpy).toBeCalled()
         expect(clearFieldsSpy).toBeCalled()
-        clearValidationsSpy.mockRestore()
+        expect(clearValidationsSpy).toBeCalled()
         clearFieldsSpy.mockRestore()
+        clearValidationsSpy.mockRestore()
       })
 
-      function setupSettingsStorageMock(eventKey: string) {
-        const settingsStorageMock = jest.mocked(settings).settingsStorage
-
+      function setupSettingsStorageMock(
+        eventKey: string,
+        newValue = '"some new value JSON"'
+      ) {
         const changeEvent: StorageChangeEvent = {
           key: eventKey,
           defaultPrevented: false,
-          newValue: '"some new value JSON"',
+          newValue,
           oldValue: '"some old value JSON"',
           target: undefined,
           type: "some type",
@@ -111,6 +146,7 @@ describe("companion", () => {
           stopImmediatePropagation: undefined,
           stopPropagation: undefined
         }
+        const settingsStorageMock = jest.mocked(settings).settingsStorage
         settingsStorageMock.addEventListener.mockImplementation(
           (_: string, handler: (event: StorageChangeEvent) => void) => {
             settingsStorageMock.setItem.mockImplementation((key: string) => {

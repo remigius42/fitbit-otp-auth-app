@@ -36,3 +36,9 @@ msgstr "Select token algorithm"
 
 msgid "Third-party licenses"
 msgstr "Third-party licenses"
+
+msgid "Tokens"
+msgstr "Tokens"
+
+msgid "Tokens section description"
+msgstr "You can set custom names for tokens by clicking on the list entries. To revert a token to the original label and issuer, click on the entry, delete the custom name and save."

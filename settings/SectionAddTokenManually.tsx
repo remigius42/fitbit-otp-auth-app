@@ -3,7 +3,7 @@
 import { gettext } from "i18n"
 import { NewTokenButton } from "../companion/ui/NewTokenButton"
 import { NewTokenFieldName } from "../companion/ui/NewTokenFieldName"
-import FieldValidationMessage from "./FieldValidationMessage"
+import ValidationMessage from "./ValidationMessage"
 
 export default function SectionAddTokenManually({ settingsStorage }) {
   return (
@@ -19,9 +19,9 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         placeholder="SSH login"
         settingsKey={NewTokenFieldName.label}
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.label}
+        componentName={NewTokenFieldName.label}
       />
 
       <TextInput
@@ -29,9 +29,9 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         placeholder="ACME co."
         settingsKey={NewTokenFieldName.issuer}
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.issuer}
+        componentName={NewTokenFieldName.issuer}
       />
 
       <TextInput
@@ -39,9 +39,9 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         placeholder="MJUXILTMPEXTEWRWMNFEITY"
         settingsKey={NewTokenFieldName.secret}
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.secret}
+        componentName={NewTokenFieldName.secret}
       />
 
       <Select
@@ -50,9 +50,9 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         settingsKey={NewTokenFieldName.algorithm}
         options={[{ name: "SHA1" }, { name: "SHA256" }, { name: "SHA512" }]}
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.algorithm}
+        componentName={NewTokenFieldName.algorithm}
       />
 
       <Select
@@ -61,9 +61,9 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         settingsKey={NewTokenFieldName.digits}
         options={[{ name: "6" }, { name: "8" }]}
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.digits}
+        componentName={NewTokenFieldName.digits}
       />
 
       <TextInput
@@ -72,15 +72,20 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         type="number"
         placeholder="30"
       />
-      <FieldValidationMessage
+      <ValidationMessage
         settingsStorage={settingsStorage}
-        fieldName={NewTokenFieldName.period}
+        componentName={NewTokenFieldName.period}
       />
 
       <Button
         label={gettext("Add token")}
         onClick={() => settingsStorage.setItem(NewTokenButton.addToken, "true")}
       />
+      <ValidationMessage
+        settingsStorage={settingsStorage}
+        componentName={NewTokenButton.addToken}
+      />
+
       <Button
         label={gettext("Reset")}
         onClick={() => settingsStorage.setItem(NewTokenButton.reset, "true")}
