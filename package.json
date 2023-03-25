@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@nuintun/qrcode": "3.3.0",
-    "base32-decode": "1.0.0"
+    "base32-decode": "1.0.0",
+    "crypto-js": "4.1.1"
   }
 }
