@@ -24,6 +24,8 @@ words:
   - stylelint
   - totp
 ignoreWords:
+  - nuintun
+  - qrcode
   - rseidelsohn
   - tsdoc
 import: ["@cspell/dict-de-ch/cspell-ext.json"]
