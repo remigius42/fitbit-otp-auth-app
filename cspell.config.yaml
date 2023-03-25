@@ -9,6 +9,7 @@ ignorePaths:
   - "/.prettierrc.yaml"
   - "/.vscode"
   - "/build"
+  - "/coverage"
 dictionaryDefinitions: []
 dictionaries: ["!de-ch"]
 words:

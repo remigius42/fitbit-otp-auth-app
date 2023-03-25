@@ -23,10 +23,17 @@ const LINT_STAGED_CONFIG = {
       )
   ],
   "**/*.md": files => mapFilesToInvocations("markdownlint-cli2", files),
-  "**/*.{ts,tsx,js,jsx}": async files => {
-    const filesToLint = await filterOutESLintIgnores(files)
-    return mapFilesToInvocations("eslint --max-warnings=0", filesToLint)
-  },
+  "**/*.{ts,tsx,js,jsx}": [
+    async files => {
+      const filesToLint = await filterOutESLintIgnores(files)
+      return mapFilesToInvocations("eslint --max-warnings=0", filesToLint)
+    },
+    files =>
+      mapFilesToInvocations(
+        "jest --bail --coverage='false' --findRelatedTests --passWithNoTests",
+        files
+      )
+  ],
   "**/*.css": files => mapFilesToInvocations("stylelint", files)
 }
 

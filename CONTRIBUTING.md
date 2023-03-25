@@ -49,3 +49,4 @@ deployment.
   - `connect phone` to connect either a cellphone or the Fitbit OS simulator
   - `build-and-install` to build the app and install it on the connected device
 - `npm run build` to build the Fitbit app
+- `npm test` to run the unit tests
