@@ -1,0 +1,69 @@
+# spellchecker:ignore aquasecurity, markdownlint, nvmrc, trivy, vuln
+
+name: "Node.js CI"
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18 # keep in sync with within this file (GitHub Actions currently don't support YAML anchors) and /.nvmrc
+          cache: "npm"
+      - name: Check for Git conflict markers
+        run: git diff --check
+      - name: Install NPM packages
+        run: npm ci --legacy-peer-deps
+      - name: Check commit messages
+        run: npx commitlint --to HEAD
+      - name: Check for license violations in the production dependencies
+        run: npm run check-licenses
+      - name: Check spelling (CSpell)
+        run: npx cspell --dot .
+      - name: Check formatting (Prettier)
+        run: npx prettier --check .
+      - name: Lint Markdown (markdownlint)
+        run: npx markdownlint-cli2 '**/*.md' '#node_modules'
+      - name: Lint Stylesheets (Stylelint)
+        run: npx stylelint --max-warnings=0 "**/*.css"
+      - name: Lint JavaScript & TypeScript (ESLint)
+        run: npx eslint --max-warnings=0 .
+      - name: Test
+        run: npm run test:ci
+      - name: Build
+        run: npm run build
+      - name: Upload build artifact for Git tags
+        if: ${{ github.ref_type == 'tag' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: OTP Auth Fitbit app
+          path: build/app.fba
+      - name: Test summary
+        if: always()
+        uses: test-summary/action@v2
+        with:
+          paths: "junit.xml"
+  security_scan:
+    name: security scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18 # keep in sync with within this file (GitHub Actions currently don't support YAML anchors) and /.nvmrc
+          cache: "npm"
+      - name: Install Husky globally # needed because normally the dev dependencies are installed including Husky but they are omitted for the security scan and `scripts.prepare` in `package.json` runs `husky install`.
+        run: sudo npm install --global husky
+      - name: Install project production dependencies
+        run: npm install --omit=dev --legacy-peer-deps
+      - name: Run security scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scanners: vuln,secret,config
+          format: table
+          exit-code: 1

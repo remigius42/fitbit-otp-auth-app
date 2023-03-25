@@ -226,3 +226,6 @@ $RECYCLE.BIN/
 
 # Ignore the generated licenses files
 /settings/licenses.js
+
+# Ignore jest-junit output
+/junit.xml
