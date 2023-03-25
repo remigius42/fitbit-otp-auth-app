@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "wayou.vscode-todo-highlight",
+    "davidanson.vscode-markdownlint",
+    "eamodio.gitlens",
+    "gruntfuggly.todo-tree",
+    "jock.svg",
+    "kirozen.wordcounter",
+    "mrorz.language-gettext",
+    "nhoizey.gremlins",
+    "redhat.vscode-yaml",
+    "redhat.vscode-xml",
+    "stkb.rewrap",
+    "streetsidesoftware.code-spell-checker",
+    "stylelint.vscode-stylelint",
+    "travisthetechie.write-good-linter"
+  ]
+}

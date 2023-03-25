@@ -1,0 +1,21 @@
+version: "0.2"
+ignorePaths:
+  - "node_modules"
+  - "/.git"
+  - "/.gitignore"
+  - "/.husky"
+  - "/.markdownlint.yaml" # spellchecker: disable-line
+  - "/.prettierrc.yaml"
+  - "/.vscode"
+  - "/build"
+dictionaryDefinitions: []
+dictionaries: ["!de-ch"]
+words:
+  - andreas
+  - commitlint
+  - fitbit
+  - remigius
+  - totp
+ignoreWords: []
+import: ["@cspell/dict-de-ch/cspell-ext.json"]
+flagWords: []

@@ -7,8 +7,10 @@
   "devDependencies": {
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
+    "@cspell/dict-de-ch": "^1.1.0",
     "@fitbit/sdk": "~6.1.0",
     "@fitbit/sdk-cli": "^1.7.3",
+    "cspell-cli": "^6.28.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.1",
     "markdownlint": "^0.27.0",
