@@ -1,3 +1,6 @@
+/* spell-checker:ignore ontick */
+
+import clock from "clock"
 import document from "document"
 import { TokenManager } from "../TokenManager"
 import {
@@ -7,7 +10,7 @@ import {
   RETRIEVING_TOKENS_ID,
   TOKENS_VIEW_PATH
 } from "./ids"
-import { setupTokenList } from "./tokens"
+import { setupTokenList, updateTokenList } from "./tokens"
 
 export function registerDelayedMessageWhetherDeviceIsConnected() {
   setTimeout(() => {
@@ -31,4 +34,10 @@ export async function showNoTokensAvailableMessage() {
 export async function showTokens(tokenManager: TokenManager) {
   await document.location.replace(TOKENS_VIEW_PATH)
   setupTokenList(tokenManager)
+  setupRefreshOncePerSecond(tokenManager)
+}
+
+function setupRefreshOncePerSecond(tokenManager: TokenManager) {
+  clock.granularity = "seconds"
+  clock.ontick = () => updateTokenList(tokenManager)
 }

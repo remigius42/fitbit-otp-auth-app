@@ -9,3 +9,4 @@ export const RETRIEVING_TOKENS_CONNECTION_ISSUE_ID =
 export const TOKEN_LIST_ID = "token-list"
 export const TOTP_TEXT_ID = "totp-text"
 export const DISPLAY_NAME_TEXT_ID = "display-name-text"
+export const PROGRESS_ID = "progress"

@@ -18,9 +18,18 @@ interface GraphicsElement {
   }
 }
 
+interface VirtualTileListElement extends GraphicsElement {
+  firstVisibleTile: number
+  lastVisibleTile: number
+  length: number
+  _length: number // to allow getter and setter
+}
+
 interface DocumentMock {
-  elements: Record<string, GraphicsElement>
-  getElementById: (id: string) => GraphicsElement | undefined
+  elements: Record<string, GraphicsElement | VirtualTileListElement>
+  getElementById: (
+    id: string
+  ) => GraphicsElement | VirtualTileListElement | undefined
   location: { replace: (path: string) => Promise<void>; pathname: string }
 }
 
@@ -39,6 +48,18 @@ const documentMock: DocumentMock = {
     [TOKEN_LIST_ID]: {
       style: {
         display: "inline"
+      },
+      get firstVisibleTile() {
+        return 23
+      },
+      get lastVisibleTile() {
+        return 42
+      },
+      set length(length: number) {
+        ;(this as VirtualTileListElement)._length = length
+      },
+      get length() {
+        return (this as VirtualTileListElement)._length
       }
     }
   },

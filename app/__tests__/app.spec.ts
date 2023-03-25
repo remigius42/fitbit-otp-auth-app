@@ -7,6 +7,8 @@ import {
 } from "../../companion/__mocks__/messaging"
 jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
+jest.doMock("clock", () => ({}), { virtual: true })
+
 import * as messaging from "messaging"
 import { PeerMessage } from "../../common/PeerMessage"
 import type { TotpConfig } from "../../common/TotpConfig"
