@@ -95,8 +95,9 @@ describe("tokens", () => {
 
         it("returns the token in the token manager with matching index as property value", () => {
           const tokenManager = new TokenManager()
-          const TEST_TOKEN_INDEX = 42
-          const TOKENS: Array<TotpConfig> = []
+          const TEST_TOKEN_INDEX = 1
+          const SOME_OTHER_TOKEN = { ...SOME_TOKEN, label: "some other token" }
+          const TOKENS: Array<TotpConfig> = [SOME_OTHER_TOKEN]
           TOKENS[TEST_TOKEN_INDEX] = SOME_TOKEN
           injectTokensIntoTokenManager(tokenManager, TOKENS)
           setupTokenList(tokenManager)
@@ -136,6 +137,34 @@ describe("tokens", () => {
           expect(totpTextSetterMock).toBeCalledWith(
             formatTotp(totp(SOME_TOKEN))
           )
+        })
+
+        it("considers the clock drift when setting the TOTP", () => {
+          const SOME_CLOCK_DRIFT_IN_SECONDS = 42
+          jest.useFakeTimers()
+          jest.setSystemTime(0)
+
+          const tokenManager = new TokenManager()
+          setupTokenList(tokenManager)
+          injectTokensIntoTokenManager(
+            tokenManager,
+            [SOME_TOKEN],
+            SOME_CLOCK_DRIFT_IN_SECONDS
+          )
+          const totpTextSetterMock = jest.fn()
+          const tileMock = setupTileMock({ totpText: totpTextSetterMock })
+          const delegate = (
+            document.getElementById(
+              TOKEN_LIST_ID
+            ) as VirtualTileList<TokenListTileInfo>
+          ).delegate
+
+          delegate.configureTile(tileMock, SOME_TILE_INFO)
+
+          expect(totpTextSetterMock).toBeCalledWith(
+            formatTotp(totp(SOME_TOKEN, SOME_CLOCK_DRIFT_IN_SECONDS))
+          )
+          jest.useRealTimers()
         })
 
         it("sets the display name", () => {
@@ -190,6 +219,45 @@ describe("tokens", () => {
             }
           )
 
+          it("considers the clock drift when setting the startAngle", () => {
+            const SOME_CLOCK_DRIFT_IN_SECONDS = 23
+            const SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT =
+              2 * SOME_CLOCK_DRIFT_IN_SECONDS * 1000
+            jest.setSystemTime(SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT)
+            const tokenManager = new TokenManager()
+            setupTokenList(tokenManager)
+            const startAngleSetterMock = jest.fn() as jest.Mock<void, [number]>
+            const tileMock = setupTileMock({
+              progressStartAngle: startAngleSetterMock
+            })
+            const delegate = (
+              document.getElementById(
+                TOKEN_LIST_ID
+              ) as VirtualTileList<TokenListTileInfo>
+            ).delegate
+            delegate.configureTile(tileMock, SOME_TILE_INFO)
+
+            // injecting the clock drift into the token manager
+            injectTokensIntoTokenManager(
+              tokenManager,
+              [SOME_TOKEN],
+              SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT / 1000 +
+                SOME_CLOCK_DRIFT_IN_SECONDS
+            )
+            // rewinding the system time by the clock drift
+            jest.setSystemTime(
+              SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT -
+                SOME_CLOCK_DRIFT_IN_SECONDS * 1000
+            )
+            delegate.configureTile(tileMock, SOME_TILE_INFO)
+
+            expect(startAngleSetterMock).toBeCalledTimes(2)
+            // since the system time offset should match the clock drift, the second startAngle should be identical to the first one
+            expect(startAngleSetterMock.mock.calls[1][0]).toBe(
+              startAngleSetterMock.mock.calls[0][0]
+            )
+          })
+
           it.each([0, 0.1, 0.3, 0.5, 0.75, 1])(
             "setting the sweepAngle of the progress indicator percentage %s to cover startAngle to 360",
             (periodPercentage: number) => {
@@ -219,6 +287,45 @@ describe("tokens", () => {
               )
             }
           )
+
+          it("considers the clock drift when setting the sweepAngle", () => {
+            const SOME_CLOCK_DRIFT_IN_SECONDS = 23
+            const SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT =
+              2 * SOME_CLOCK_DRIFT_IN_SECONDS * 1000
+            jest.setSystemTime(SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT)
+            const tokenManager = new TokenManager()
+            setupTokenList(tokenManager)
+            const sweepAngleSetterMock = jest.fn() as jest.Mock<void, [number]>
+            const tileMock = setupTileMock({
+              progressSweepAngle: sweepAngleSetterMock
+            })
+            const delegate = (
+              document.getElementById(
+                TOKEN_LIST_ID
+              ) as VirtualTileList<TokenListTileInfo>
+            ).delegate
+            delegate.configureTile(tileMock, SOME_TILE_INFO)
+
+            // injecting the clock drift into the token manager
+            injectTokensIntoTokenManager(
+              tokenManager,
+              [SOME_TOKEN],
+              SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT / 1000 +
+                SOME_CLOCK_DRIFT_IN_SECONDS
+            )
+            // rewinding the system time by the clock drift
+            jest.setSystemTime(
+              SOME_SYSTEM_TIME_AFTER_CLOCK_DRIFT -
+                SOME_CLOCK_DRIFT_IN_SECONDS * 1000
+            )
+            delegate.configureTile(tileMock, SOME_TILE_INFO)
+
+            expect(sweepAngleSetterMock).toBeCalledTimes(2)
+            // since the system time offset should match the clock drift, the second sweepAngle should be identical to the first one
+            expect(sweepAngleSetterMock.mock.calls[1][0]).toBe(
+              sweepAngleSetterMock.mock.calls[0][0]
+            )
+          })
         })
 
         it("does not configure the tile if it doesn't have the correct type", () => {
@@ -555,15 +662,23 @@ token for a tile which had its token deleted. */
 
   function injectTokensIntoTokenManager(
     tokenManager: TokenManager,
-    tokens: Array<TotpConfig>
+    tokens: Array<TotpConfig>,
+    secondsSinceEpochInCompanion?: number
   ) {
-    /* Exploiting the mutability of the returned state of tokenManager is
-     * debatable, but the alternatives would be either a very convoluted
-     * test or adding functionality to set its state only used for
-     * testing.
-     */
-    tokenManager
-      .getTokens()
-      .splice(0, tokenManager.getTokens().length, ...tokens)
+    tokenManager.handleUpdateTokensMessage({
+      type: "UPDATE_TOKENS_START_MESSAGE",
+      count: tokens.length,
+      secondsSinceEpochInCompanion
+    })
+    tokens.forEach((token, index) =>
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_TOKEN_MESSAGE",
+        index,
+        token
+      })
+    )
+    tokenManager.handleUpdateTokensMessage({
+      type: "UPDATE_TOKENS_END_MESSAGE"
+    })
   }
 })

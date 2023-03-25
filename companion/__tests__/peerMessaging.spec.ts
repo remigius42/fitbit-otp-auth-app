@@ -47,7 +47,8 @@ describe("peerMessaging", () => {
 
       expect(peerSocketMock.send).toBeCalledWith({
         type: "UPDATE_TOKENS_START_MESSAGE",
-        count: SOME_TOKENS.length
+        count: SOME_TOKENS.length,
+        secondsSinceEpochInCompanion: expect.any(Number) as number
       })
     })
 
@@ -77,7 +78,8 @@ describe("peerMessaging", () => {
 
       expect(peerSocketMock.send).toBeCalledWith({
         count: 0,
-        type: "UPDATE_TOKENS_START_MESSAGE"
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        secondsSinceEpochInCompanion: expect.any(Number) as number
       })
       expect(peerSocketMock.send).toBeCalledWith({
         type: "UPDATE_TOKENS_END_MESSAGE"
@@ -119,7 +121,8 @@ describe("peerMessaging", () => {
 
       expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
         type: "UPDATE_TOKENS_START_MESSAGE",
-        count: expect.any(Number) as number
+        count: expect.any(Number) as number,
+        secondsSinceEpochInCompanion: expect.any(Number) as number
       })
     })
 
@@ -131,8 +134,26 @@ describe("peerMessaging", () => {
 
       expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
         type: "UPDATE_TOKENS_START_MESSAGE",
-        count: SOME_TOKENS.length
+        count: SOME_TOKENS.length,
+        secondsSinceEpochInCompanion: expect.any(Number) as number
       })
+    })
+
+    it("sends the current seconds since epoch in the start message", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      jest.useFakeTimers()
+      jest.setSystemTime(SOME_SECONDS_SINCE_EPOCH * 1000)
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+
+      sendTokensToDevice(SOME_TOKENS)
+
+      expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: expect.any(Number) as number,
+        secondsSinceEpochInCompanion: 42
+      })
+      jest.useRealTimers()
     })
 
     it("sends the tokens with update token messages", () => {

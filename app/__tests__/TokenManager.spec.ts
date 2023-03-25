@@ -98,6 +98,62 @@ describe("TokenManager", () => {
 
       expect(tokenManager.getTokens()).toStrictEqual([SOME_TOKEN])
     })
+
+    it("defaults to a clock drift of 0 if the secondsSinceEpochInCompanion is not provided", () => {
+      const tokenManager = new TokenManager()
+
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 0
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(tokenManager.getClockDrift()).toBe(0)
+    })
+
+    it("sets the clock drift as the difference in seconds since epoch between companion and device", () => {
+      const SECONDS_SINCE_EPOCH_IN_COMPANION = 42
+      const SECONDS_SINCE_EPOCH_IN_DEVICE = 23
+      jest.useFakeTimers()
+      jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+      const tokenManager = new TokenManager()
+
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 0,
+        secondsSinceEpochInCompanion: SECONDS_SINCE_EPOCH_IN_COMPANION
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(tokenManager.getClockDrift()).toBe(
+        SECONDS_SINCE_EPOCH_IN_COMPANION - SECONDS_SINCE_EPOCH_IN_DEVICE
+      )
+      jest.useRealTimers()
+    })
+
+    it("ignores the new clock drift if the update sequence is invalid", () => {
+      const SECONDS_SINCE_EPOCH_IN_COMPANION = 42
+      const SECONDS_SINCE_EPOCH_IN_DEVICE = 23
+      jest.useFakeTimers()
+      jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+      const tokenManager = new TokenManager()
+
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 1, // corrupt update sequence by setting expected tokens to 1 while providing none.
+        secondsSinceEpochInCompanion: SECONDS_SINCE_EPOCH_IN_COMPANION
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(tokenManager.getClockDrift()).toBe(0)
+      jest.useRealTimers()
+    })
   })
 
   describe("getTokens", () => {
@@ -187,6 +243,33 @@ describe("TokenManager", () => {
 
       const expectedTotp = totp.totp(SOME_TOKEN)
       expect(tokenManagerTotp).toBe(expectedTotp)
+    })
+
+    it("considers the clock drift", () => {
+      const tokenManager = new TokenManager()
+      const SOME_CLOCK_DRIFT = 42
+      addTokensToTokenManager(tokenManager, [SOME_TOKEN], SOME_CLOCK_DRIFT)
+
+      const tokenManagerTotp = tokenManager.getPassword(SOME_TOKEN)
+
+      const expectedTotp = totp.totp(SOME_TOKEN, SOME_CLOCK_DRIFT)
+      expect(tokenManagerTotp).toBe(expectedTotp)
+    })
+
+    it("does not return undefined if the clock drift compensation shifts the current period", () => {
+      //      d5a41348ad612422057fb598aaf58cd130c9b7cb
+      const MORE_THAN_PERIOD_SECONDS = Number(SOME_TOKEN.period) * 2
+      let now = 0
+      jest
+        .spyOn(Date, "now")
+        .mockImplementation(() => (now += MORE_THAN_PERIOD_SECONDS * 1000))
+      const tokenManager = new TokenManager()
+      const SOME_CLOCK_DRIFT = 42
+      addTokensToTokenManager(tokenManager, [SOME_TOKEN], SOME_CLOCK_DRIFT)
+
+      const tokenManagerTotp = tokenManager.getPassword(SOME_TOKEN)
+
+      expect(tokenManagerTotp).toBeDefined()
     })
   })
 
@@ -330,13 +413,50 @@ describe("TokenManager", () => {
     })
   })
 
+  describe("getClockDrift", () => {
+    it("returns the clock drift of the latest valid update sequence", () => {
+      const SECONDS_SINCE_EPOCH_IN_COMPANION = 42
+      const SOME_OTHER_SECONDS_SINCE_EPOCH_IN_COMPANION = 123
+      const SECONDS_SINCE_EPOCH_IN_DEVICE = 23
+      jest.useFakeTimers()
+      jest.setSystemTime(SECONDS_SINCE_EPOCH_IN_DEVICE * 1000)
+      const tokenManager = new TokenManager()
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 0,
+        secondsSinceEpochInCompanion: SECONDS_SINCE_EPOCH_IN_COMPANION
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      // send invalid sequence trying to update `secondsSinceEpochInCompanion`
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 1, // corrupt update sequence by setting expected tokens to 1 while providing none.
+        secondsSinceEpochInCompanion:
+          SOME_OTHER_SECONDS_SINCE_EPOCH_IN_COMPANION
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(tokenManager.getClockDrift()).toBe(
+        SECONDS_SINCE_EPOCH_IN_COMPANION - SECONDS_SINCE_EPOCH_IN_DEVICE
+      )
+      jest.useRealTimers()
+    })
+  })
+
   function addTokensToTokenManager(
     tokenManager: TokenManager,
-    tokens: Array<TotpConfig>
+    tokens: Array<TotpConfig>,
+    secondsSinceEpochInCompanion?: number
   ) {
     tokenManager.handleUpdateTokensMessage({
       type: "UPDATE_TOKENS_START_MESSAGE",
-      count: tokens.length
+      count: tokens.length,
+      secondsSinceEpochInCompanion
     })
 
     tokens.forEach((token, index) =>
@@ -353,18 +473,18 @@ describe("TokenManager", () => {
   }
 
   function getTotpInvocationsForCurrentPeriod(
-    totpSpy: jest.SpyInstance<string, [TotpConfig, boolean?]>
+    totpSpy: jest.SpyInstance<string, [TotpConfig, number?, boolean?]>
   ) {
     return totpSpy.mock.calls.filter(
-      ([, isForNextPeriod]) => isForNextPeriod === undefined
+      ([, , isForNextPeriod]) => isForNextPeriod === undefined
     ).length
   }
 
   function getTotpInvocationsForNextPeriod(
-    totpSpy: jest.SpyInstance<string, [TotpConfig, boolean?]>
+    totpSpy: jest.SpyInstance<string, [TotpConfig, number?, boolean?]>
   ) {
     return totpSpy.mock.calls.filter(
-      ([, isForNextPeriod]) => isForNextPeriod === true
+      ([, , isForNextPeriod]) => isForNextPeriod === true
     ).length
   }
 })

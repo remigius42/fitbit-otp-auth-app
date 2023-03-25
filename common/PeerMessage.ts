@@ -4,6 +4,8 @@ export interface UpdateTokensStartMessage {
   type: "UPDATE_TOKENS_START_MESSAGE"
   /** Expected number of tokens. Used to detect whether messages have been lost. */
   count: number
+  /** Optional seconds since epoch in companion. Used to compensate clock drift on the device. */
+  secondsSinceEpochInCompanion?: number
 }
 
 export interface UpdateTokensTokenMessage {

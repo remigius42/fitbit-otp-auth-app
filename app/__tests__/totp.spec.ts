@@ -132,7 +132,7 @@ describe("totp", () => {
       period: "30"
     }
 
-    expect(totp(totpConfig)).toBe(totp(totpConfig, false))
+    expect(totp(totpConfig, 0)).toBe(totp(totpConfig, 0, false))
     jest.useRealTimers()
   })
 
@@ -148,21 +148,88 @@ describe("totp", () => {
       period: String(SOME_PERIOD)
     }
 
-    const totpForNextPeriod = totp(totpConfig, true)
+    const totpForNextPeriod = totp(totpConfig, 0, true)
 
     jest.advanceTimersByTime(SOME_PERIOD * 1000)
-    expect(totpForNextPeriod).toBe(totp(totpConfig, false))
+    expect(totpForNextPeriod).toBe(totp(totpConfig, 0, false))
     jest.useRealTimers()
   })
 
-  it("currentPeriod returns the current period (starting at 0) based on the given duration in seconds", () => {
+  it("defaults to a clock drift of 0", () => {
     jest.useFakeTimers()
-    const SOME_SECONDS = 42
-    jest.setSystemTime(SOME_SECONDS * 1000)
+    jest.setSystemTime(42 * 1000)
+    const totpConfig: TotpConfig = {
+      label: "some label",
+      secret: "MJUXILTMPEXTEWRWMNFEITY",
+      algorithm: "SHA1",
+      digits: "8",
+      period: "30"
+    }
 
-    const period = currentPeriod(30)
-
-    expect(period).toBe(1)
+    expect(totp(totpConfig)).toBe(totp(totpConfig, 0))
     jest.useRealTimers()
+  })
+
+  it("considers the clock drift", () => {
+    jest.useFakeTimers()
+    const SOME_SYSTEM_TIME = 42 * 1000
+    jest.setSystemTime(SOME_SYSTEM_TIME)
+    const totpConfig: TotpConfig = {
+      label: "some label",
+      secret: "MJUXILTMPEXTEWRWMNFEITY",
+      algorithm: "SHA1",
+      digits: "8",
+      period: "30"
+    }
+    const SOME_CLOCK_DRIFT_IN_SECONDS = 42
+
+    const totpWithClockDrift = totp(totpConfig, SOME_CLOCK_DRIFT_IN_SECONDS)
+
+    jest.setSystemTime(SOME_SYSTEM_TIME + SOME_CLOCK_DRIFT_IN_SECONDS * 1000)
+    expect(totpWithClockDrift).toBe(totp(totpConfig, 0))
+    jest.useRealTimers()
+  })
+
+  describe("currentPeriod", () => {
+    it("returns the current period (starting at 0) based on the given duration in seconds", () => {
+      jest.useFakeTimers()
+      const SOME_SECONDS = 42
+      jest.setSystemTime(SOME_SECONDS * 1000)
+
+      const period = currentPeriod(30)
+
+      expect(period).toBe(1)
+      jest.useRealTimers()
+    })
+
+    it("by default has a clock drift of 0", () => {
+      jest.useFakeTimers()
+      const SOME_SECONDS = 42
+      jest.setSystemTime(SOME_SECONDS * 1000)
+      const SOME_PERIOD = 30
+
+      const actualPeriod = currentPeriod(SOME_PERIOD)
+
+      const periodWithZeroClockDrift = currentPeriod(SOME_PERIOD, 0)
+      expect(actualPeriod).toBe(periodWithZeroClockDrift)
+      jest.useRealTimers()
+    })
+
+    it("considers the clock drift", () => {
+      jest.useFakeTimers()
+      const SOME_SECONDS = 42
+      jest.setSystemTime(SOME_SECONDS * 1000)
+      const SOME_PERIOD = 30
+      const CLOCK_DRIFT_EQUAL_ONE_PERIOD = SOME_PERIOD
+
+      const actualPeriod = currentPeriod(
+        SOME_PERIOD,
+        CLOCK_DRIFT_EQUAL_ONE_PERIOD
+      )
+
+      const expectedPeriod = currentPeriod(SOME_PERIOD, 0) + 1
+      expect(actualPeriod).toBe(expectedPeriod)
+      jest.useRealTimers()
+    })
   })
 })

@@ -44,7 +44,7 @@ export function setupTokenList(tokenManager: TokenManager) {
             tokenManager.getPassword(token)
           )
           tile.getElementById(DISPLAY_NAME_TEXT_ID).text = getDisplayName(token)
-          setProgressIndicator(tile, token.period)
+          setProgressIndicator(tile, token.period, tokenManager.getClockDrift())
         }
       }
     }
@@ -78,15 +78,19 @@ export function updateTokenList(tokenManager: TokenManager) {
   }
 }
 
-function setProgressIndicator(tile: VirtualTileListItem, tokenPeriod: string) {
-  const startAngle = getStartAngle(tokenPeriod)
+function setProgressIndicator(
+  tile: VirtualTileListItem,
+  tokenPeriod: string,
+  clockDrift: number
+) {
+  const startAngle = getStartAngle(tokenPeriod, clockDrift)
   const sweepAngle = 360 - startAngle
   ;(tile.getElementById(PROGRESS_ID) as ArcElement).startAngle = startAngle
   ;(tile.getElementById(PROGRESS_ID) as ArcElement).sweepAngle = sweepAngle
 
-  function getStartAngle(tokenPeriod: string) {
+  function getStartAngle(tokenPeriod: string, clockDrift: number) {
     const period = Number(tokenPeriod)
-    const secondsSinceEpoch = Date.now() / 1000
+    const secondsSinceEpoch = Date.now() / 1000 + clockDrift
     const currentPeriodSeconds = secondsSinceEpoch % period
     const currentPeriodPercentage = currentPeriodSeconds / period
     const angleInDegrees = currentPeriodPercentage * 360

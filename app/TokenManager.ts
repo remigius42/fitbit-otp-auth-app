@@ -27,6 +27,9 @@ export class TokenManager {
         if (this.updateTokensBuffer.wasUpdateSuccessful()) {
           this.updateTokens()
           this.notifyObservers()
+          this.passwordCache.setClockDrift(
+            this.updateTokensBuffer.getClockDrift()
+          )
         }
         break
       /* istanbul ignore next: this is only the compile time exhaustiveness check (see https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking) */
@@ -53,6 +56,10 @@ export class TokenManager {
     return this.passwordCache.getPassword(totpConfig)
   }
 
+  getClockDrift() {
+    return this.passwordCache.getClockDrift()
+  }
+
   private updateTokens() {
     this.tokens.length = 0
     this.updateTokensBuffer
@@ -70,12 +77,19 @@ class UpdateTokensBuffer {
   private readonly tokens: Array<TotpConfig> = []
   private updateSuccessful = false
   private hasUpdateStarted = false
+  private clockDrift = 0
 
-  handleStartMessage(message: UpdateTokensStartMessage) {
-    this.expectedCount = message.count
+  handleStartMessage({
+    count,
+    secondsSinceEpochInCompanion
+  }: UpdateTokensStartMessage) {
+    this.expectedCount = count
     this.tokens.length = 0
     this.updateSuccessful = false
     this.hasUpdateStarted = true
+    this.clockDrift = secondsSinceEpochInCompanion
+      ? secondsSinceEpochInCompanion - Date.now() / 1000
+      : 0
   }
 
   handleTokenMessage(message: UpdateTokensTokenMessage) {
@@ -117,10 +131,15 @@ received before still pending "token messages" can disrupt an update. */
     return this.tokens
   }
 
+  getClockDrift() {
+    return this.clockDrift
+  }
+
   private abortUpdate() {
     this.updateSuccessful = false
     this.hasUpdateStarted = false
     this.tokens.length = 0
+    this.clockDrift = 0
   }
 }
 
@@ -136,19 +155,36 @@ class TokenPasswordCache {
     string,
     Record<string, Record<number, string>>
   > = {}
+  private clockDrift = 0
 
   getPassword(totpConfig: TotpConfig) {
     const { issuer, label, period } = totpConfig
-    this.ensureIssuerAndLabelAreRegistered(issuer, label)
+    /* In rare cases, `currentPeriod` can change while this function runs due an
+    update with a changed clock drift compensation. It is therefore important, lock
+    the current period at the beginning and that the following code uses the locked
+    version. Failing to do so could lead to a cache miss with this function
+    returning `undefined`.
+    +*/
+    const currentPeriod = this.currentPeriod(period)
 
-    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+    this.ensureIssuerAndLabelAreRegistered(issuer, label)
     if (!this.cache[issuer][label][currentPeriod]) {
-      this.cache[issuer][label] = { [currentPeriod]: totp(totpConfig) }
+      this.cache[issuer][label] = {
+        [currentPeriod]: totp(totpConfig, this.clockDrift)
+      }
     }
-    this.randomlyPreCacheNextPassword(totpConfig)
-    this.keepTwoCachedPasswordsByToken(totpConfig)
+    this.randomlyPreCacheNextPassword(totpConfig, currentPeriod)
+    this.keepTwoCachedPasswordsByToken(totpConfig, currentPeriod)
 
     return this.cache[issuer][label][currentPeriod]
+  }
+
+  getClockDrift() {
+    return this.clockDrift
+  }
+
+  setClockDrift(clockDrift: number) {
+    this.clockDrift = clockDrift
   }
 
   private ensureIssuerAndLabelAreRegistered(issuer: string, label: string) {
@@ -160,9 +196,12 @@ class TokenPasswordCache {
     }
   }
 
-  private randomlyPreCacheNextPassword(totpConfig: TotpConfig) {
-    const { issuer, label, period } = totpConfig
-    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+  private randomlyPreCacheNextPassword(
+    totpConfig: TotpConfig,
+    currentPeriod: number
+  ) {
+    const { issuer, label } = totpConfig
+    // const currentPeriod = this.currentPeriod(period)
     const nextPeriod = currentPeriod + 1
 
     /* Looking at the pre-cache step as a binomial distribution where
@@ -171,12 +210,18 @@ class TokenPasswordCache {
      * using p = 0.15 should yield a > 99% probability that the password is pre-cached
      */
     if (!this.cache[issuer][label][nextPeriod] && Math.random() < 0.15) {
-      this.cache[issuer][label][nextPeriod] = totp(totpConfig, true)
+      this.cache[issuer][label][nextPeriod] = totp(
+        totpConfig,
+        this.clockDrift,
+        true
+      )
     }
   }
 
-  private keepTwoCachedPasswordsByToken({ issuer, label, period }: TotpConfig) {
-    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+  private keepTwoCachedPasswordsByToken(
+    { issuer, label }: TotpConfig,
+    currentPeriod: number
+  ) {
     const currentPassword = this.cache[issuer][label][currentPeriod]
     const nextPassword = this.cache[issuer][label][currentPeriod + 1]
 
@@ -186,8 +231,8 @@ class TokenPasswordCache {
     }
   }
 
-  private static currentPeriod(periodString: string) {
+  private currentPeriod(periodString: string) {
     const period = Number(periodString)
-    return currentPeriod(period)
+    return currentPeriod(period, this.clockDrift)
   }
 }

@@ -31,7 +31,8 @@ export function sendTokensWhenDeviceIsReady() {
 export function sendTokensToDevice(tokens: Array<TotpConfig>) {
   sendMessageToDevice({
     type: "UPDATE_TOKENS_START_MESSAGE",
-    count: tokens.length
+    count: tokens.length,
+    secondsSinceEpochInCompanion: Date.now() / 1000
   })
 
   tokens.forEach((token, index) =>
