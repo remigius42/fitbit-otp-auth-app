@@ -1,0 +1,2 @@
+msgid "Please add tokens in this app's settings within the Fitbit app."
+msgstr "Bitte fügen Sie Token in den Einstellungen dieser App in der Fitbit-App hinzu."
