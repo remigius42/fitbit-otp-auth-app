@@ -1,4 +1,5 @@
-registerSettingsPage(({ settings }) => (
+/* eslint-disable no-undef */
+registerSettingsPage(() => (
   <Page>
     <Section
       title={

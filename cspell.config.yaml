@@ -1,6 +1,7 @@
 version: "0.2"
 ignorePaths:
   - "node_modules"
+  - "/.eslintignore"
   - "/.git"
   - "/.gitignore"
   - "/.husky"
@@ -16,6 +17,7 @@ words:
   - fitbit
   - remigius
   - totp
-ignoreWords: []
+ignoreWords:
+  - tsdoc
 import: ["@cspell/dict-de-ch/cspell-ext.json"]
 flagWords: []

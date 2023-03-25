@@ -1,3 +1,14 @@
+import { ESLint } from "eslint"
+
+const filterOutESLintIgnores = async files => {
+  const eslint = new ESLint()
+  const isIgnored = await Promise.all(
+    files.map(file => eslint.isPathIgnored(file))
+  )
+  const filteredFiles = files.filter((_, i) => !isIgnored[i])
+  return filteredFiles
+}
+
 const LINT_STAGED_CONFIG = {
   "**/*": [
     files =>
@@ -11,7 +22,11 @@ const LINT_STAGED_CONFIG = {
         files
       )
   ],
-  "**/*.md": files => mapFilesToInvocations("markdownlint-cli2", files)
+  "**/*.md": files => mapFilesToInvocations("markdownlint-cli2", files),
+  "**/*.{ts,tsx,js,jsx}": async files => {
+    const filesToLint = await filterOutESLintIgnores(files)
+    return mapFilesToInvocations("eslint --max-warnings=0", filesToLint)
+  }
 }
 
 /**
