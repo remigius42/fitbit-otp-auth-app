@@ -3,6 +3,7 @@
 import { gettext } from "i18n"
 import { NewTokenButton } from "../companion/ui/NewTokenButton"
 import { NewTokenFieldName } from "../companion/ui/NewTokenFieldName"
+import ConnectionStatus from "./ConnectionStatus"
 import ValidationMessage from "./ValidationMessage"
 
 export default function SectionAddTokenManually({ settingsStorage }) {
@@ -92,6 +93,8 @@ export default function SectionAddTokenManually({ settingsStorage }) {
         label={gettext("Reset")}
         onClick={() => settingsStorage.setItem(NewTokenButton.reset, "true")}
       />
+
+      <ConnectionStatus settingsStorage={settingsStorage} />
     </Section>
   )
 }

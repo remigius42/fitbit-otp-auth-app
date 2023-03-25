@@ -10,12 +10,14 @@ import { AppSettings } from "../../common/AppSettings"
 import { ColorSchemeName } from "../../common/ColorSchemes"
 import type { TotpConfig } from "../../common/TotpConfig"
 import {
+  monitorConnectionState,
   sendSettingsWhenDeviceIsReady,
   sendTokensToDevice,
   sendTokensWhenDeviceIsReady,
   updateSettings
 } from "../peerMessaging"
 import { TOKENS_SETTINGS_KEY } from "../tokens"
+import * as connectionStatus from "../ui/connectionStatus"
 import { SettingsButton } from "../ui/SettingsButton"
 
 describe("peerMessaging", () => {
@@ -59,6 +61,58 @@ describe("peerMessaging", () => {
   const SOME_SETTINGS_UPDATE: Partial<AppSettings> = {
     shouldUseLargeTokenView: true
   }
+
+  describe("monitorConnectionState", () => {
+    it("adds a socket open listener which invokes UI function to signal connectivity", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      const signalConnectedSpy = jest.spyOn(connectionStatus, "signalConnected")
+
+      monitorConnectionState()
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+
+      expect(signalConnectedSpy).toBeCalled()
+      signalConnectedSpy.mockRestore()
+    })
+
+    it("adds a socket close listener which invokes UI function to signal lack of connectivity", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      const signalDisconnectedSpy = jest.spyOn(
+        connectionStatus,
+        "signalDisconnected"
+      )
+
+      monitorConnectionState()
+      ;(peerSocketMock as unknown as PeerSocketMock).closeSocket()
+
+      expect(signalDisconnectedSpy).toBeCalled()
+      signalDisconnectedSpy.mockRestore()
+    })
+
+    it("does not cause the UI to signal lack of connectivity if the device is connected", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      const signalDisconnectedSpy = jest.spyOn(
+        connectionStatus,
+        "signalDisconnected"
+      )
+
+      monitorConnectionState()
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+
+      expect(signalDisconnectedSpy).not.toBeCalled()
+      signalDisconnectedSpy.mockRestore()
+    })
+
+    it("does not cause the UI to signal connectivity if the device is disconnected", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      const signalConnectedSpy = jest.spyOn(connectionStatus, "signalConnected")
+
+      monitorConnectionState()
+      ;(peerSocketMock as unknown as PeerSocketMock).closeSocket()
+
+      expect(signalConnectedSpy).not.toBeCalled()
+      signalConnectedSpy.mockRestore()
+    })
+  })
 
   describe("sendTokensWhenDeviceIsReady", () => {
     it("sends the current tokens as soon the device is ready", () => {

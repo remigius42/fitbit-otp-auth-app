@@ -2,6 +2,7 @@ import { gettext } from "i18n"
 import { getDisplayName } from "../common/formatTokens"
 import type { TotpConfig } from "../common/TotpConfig"
 import { NewTokenButton } from "../companion/ui/NewTokenButton"
+import ConnectionStatus from "./ConnectionStatus"
 import {
   getValidationMessageSetting,
   UPDATE_DISPLAY_NAME_SETTINGS_KEY
@@ -59,6 +60,8 @@ export function SectionTokens({ settingsStorage }) {
         settingsStorage={settingsStorage}
         componentName={NewTokenButton.addTokenViaQrTag}
       />
+
+      <ConnectionStatus settingsStorage={settingsStorage} />
     </Section>
   )
 }

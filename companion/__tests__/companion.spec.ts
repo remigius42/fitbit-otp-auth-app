@@ -466,5 +466,16 @@ describe("companion", () => {
         return settingsStorageMock
       }
     })
+
+    it("invokes function to monitor the peer connection state", () => {
+      const monitorConnectionStateSpy = jest.spyOn(
+        peerMessaging,
+        "monitorConnectionState"
+      )
+
+      void initialize()
+
+      expect(monitorConnectionStateSpy).toBeCalled()
+    })
   })
 })

@@ -3,6 +3,7 @@ import { ColorSchemeName } from "../common/ColorSchemes"
 import type { TotpConfig } from "../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
+  monitorConnectionState,
   sendSettingsWhenDeviceIsReady,
   sendTokensToDevice,
   sendTokensWhenDeviceIsReady,
@@ -37,6 +38,7 @@ export async function initialize() {
   addSettingsChangeListener()
   sendTokensWhenDeviceIsReady()
   sendSettingsWhenDeviceIsReady()
+  monitorConnectionState()
 }
 
 function addSettingsChangeListener() {

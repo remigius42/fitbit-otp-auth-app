@@ -19,8 +19,10 @@ export interface PeerSocketMock {
   CLOSED: peerSocketMockReadyState.CLOSED
   addEventListener: (eventName: string, listener: EventListener) => void
   openEventListeners: Array<EventListener>
+  closeEventListeners: Array<EventListener>
   messageEventListeners: Array<MessageEventListeners>
   openSocket: () => void
+  closeSocket: () => void
   mockReset: () => void
   readyState: peerSocketMockReadyState
   receive: (message: { data: object }) => void
@@ -35,6 +37,8 @@ const peerSocketMock: PeerSocketMock = {
   ) {
     if (eventName === "open") {
       this.openEventListeners.push(listener)
+    } else if (eventName === "close") {
+      this.closeEventListeners.push(listener)
     } else if (eventName === "message") {
       this.messageEventListeners.push(listener)
     }
@@ -42,9 +46,16 @@ const peerSocketMock: PeerSocketMock = {
   CLOSED: peerSocketMockReadyState.CLOSED,
   OPEN: peerSocketMockReadyState.OPEN,
   openEventListeners: [],
+  closeEventListeners: [],
   openSocket(this: PeerSocketMock) {
     this.readyState = peerSocketMockReadyState.OPEN
     this.openEventListeners.forEach(listener =>
+      listener({ type: "some event type" })
+    )
+  },
+  closeSocket(this: PeerSocketMock) {
+    this.readyState = peerSocketMockReadyState.CLOSED
+    this.closeEventListeners.forEach(listener =>
       listener({ type: "some event type" })
     )
   },

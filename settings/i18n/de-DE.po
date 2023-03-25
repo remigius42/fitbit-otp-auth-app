@@ -42,6 +42,9 @@ msgstr "Bezeichnung"
 msgid "License information"
 msgstr "Lizenzinformationen"
 
+msgid "No connection to device message"
+msgstr "Die App auf der Smartwatch ist aktuell nicht verbunden. Die Einstellungen werden zur Smartwatch übertragen, sobald wieder eine Verbindung besteht. Sie können versuchen die Verbindung herzustellen, indem Sie die App auf der Smartwatch nochmals starten."
+
 msgid "Number of digits"
 msgstr "Anzahl Ziffern"
 

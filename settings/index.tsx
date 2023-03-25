@@ -10,7 +10,7 @@ function SettingsPage({ settingsStorage }) {
 
       <SectionAddTokenManually settingsStorage={settingsStorage} />
 
-      <SectionSettings />
+      <SectionSettings settingsStorage={settingsStorage} />
 
       <SectionLicenses />
     </Page>

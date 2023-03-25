@@ -1,8 +1,9 @@
 import { gettext } from "i18n"
 import { ColorSchemeName, ColorSchemes } from "../common/ColorSchemes"
 import { SettingsButton } from "../companion/ui/SettingsButton"
+import ConnectionStatus from "./ConnectionStatus"
 
-export default function SectionSettings() {
+export default function SectionSettings({ settingsStorage }) {
   return (
     <Section
       title={
@@ -57,6 +58,8 @@ export default function SectionSettings() {
           }
         ]}
       />
+
+      <ConnectionStatus settingsStorage={settingsStorage} />
     </Section>
   )
 }
