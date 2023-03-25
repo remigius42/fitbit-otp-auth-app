@@ -11,3 +11,5 @@ rules:
     - ignoreProperties:
         - text-length
   font-family-no-missing-generic-family-keyword: null # Fitbit only supports the values "System-Regular", "System-Light", "System-Bold" and no generic names, see https://dev.fitbit.com/build/guides/user-interface/css/#fonts
+  # BEM; ([a-z]|(?<!-)-(?!-))+ means lowercase letters or a dash for joining words, but a dash only if it's not directly preceded or followed by a dash.
+  selector-class-pattern: "^([a-z]|(?<!-)-(?!-))+(__([a-z]|(?<!-)-(?!-))+)?(--([a-z]|(?<!-)-(?!-))+)?$"
