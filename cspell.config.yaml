@@ -42,6 +42,8 @@ words:
   - stylelint
   - totp
 ignoreWords:
+  - conventionalcommits
+  - infile
   - nuintun
   - qrcode
   - rseidelsohn
