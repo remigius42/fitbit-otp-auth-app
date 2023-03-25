@@ -1,6 +1,6 @@
 import { gettext } from "i18n"
 import licenses from "./licenses"
-import { getCopyright, getVersion, thirdPartyLicenseKeys } from "./ui"
+import { getVersion, thirdPartyLicenseKeys } from "./ui"
 
 export default function SectionLicenses() {
   return (
@@ -14,7 +14,8 @@ export default function SectionLicenses() {
       <Text>
         <Text bold>fitbit-otp-auth-app</Text> v{getVersion(licenses)}
       </Text>
-      <Text>{getCopyright(licenses)}</Text>
+      <Text>Copyright 2023 binary poetry gmbh.</Text>
+      <Text>{gettext("Licensed under GPL version 3.0 or later.")}</Text>
       <Text bold>{gettext("Third-party licenses")}</Text>
       {thirdPartyLicenseKeys(licenses).map(key => (
         <Text>

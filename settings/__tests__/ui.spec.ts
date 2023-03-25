@@ -5,7 +5,6 @@ import {
   NewTokenFieldNameValues
 } from "../../companion/ui/NewTokenFieldName"
 import {
-  getCopyright,
   getValidationMessageSetting,
   getVersion,
   thirdPartyLicenseKeys
@@ -43,12 +42,6 @@ describe("ui", () => {
   describe("getVersion", () => {
     it("extracts the version of this NPM package from the license data", () => {
       expect(getVersion(testLicenses)).toBe("1.2.3")
-    })
-  })
-
-  describe("getCopyright", () => {
-    it("extracts the copyright of this NPM package from the license data", () => {
-      expect(getCopyright(testLicenses)).toBe("some copyright notice")
     })
   })
 

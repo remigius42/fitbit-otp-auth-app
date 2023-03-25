@@ -43,6 +43,9 @@ msgstr "Label"
 msgid "License information"
 msgstr "License information"
 
+msgid "Licensed under GPL version 3.0 or later."
+msgstr "Licensed under GPL version 3.0 or later."
+
 msgid "No connection to device message"
 msgstr "The app on the smartwatch is currently not connected to your phone. The settings will by sent to the smartwatch as soon as the connection is reestablished. You could try to reestablish the connection by restarting the app on the smartwatch."
 
