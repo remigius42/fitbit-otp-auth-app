@@ -10,6 +10,9 @@ ignorePaths:
   - "/.vscode"
   - "/build"
   - "/coverage"
+  - "/docs/_site"
+  - "/docs/.sass-cache"
+  - "/docs/.jekyll-cache"
   - "/resources/icon.svg"
   - "/settings/licenses.js"
 dictionaryDefinitions: []
@@ -37,3 +40,5 @@ flagWords:
 overrides:
   - filename: "**/i18n/de-DE.po"
     dictionaries: ["!!de-ch"]
+  - filename: "docs/collections/_app_de/**/*.md"
+    dictionaries: ["!!de-ch", "!en_us"]

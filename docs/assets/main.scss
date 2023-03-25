@@ -1,0 +1,26 @@
+---
+---
+
+@import "minima";
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  &:target {
+    border-top: 3px solid #ffd502;
+    border-bottom: 2px solid #ffd502;
+  }
+}
+
+.site-header {
+  border-top: none;
+}
+
+.footnotes {
+  border-top: 1px solid black;
+  margin-top: 1.5em;
+  padding-top: 0.5em;
+}

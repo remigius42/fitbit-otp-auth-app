@@ -1,4 +1,4 @@
-# spellchecker:ignore aquasecurity, markdownlint, nvmrc, trivy, vuln
+# spellchecker:ignore aquasecurity, htmlproofer, markdownlint, nvmrc, trivy, vuln
 
 name: "Node.js CI"
 on:
@@ -46,6 +46,22 @@ jobs:
         uses: test-summary/action@v2
         with:
           paths: "junit.xml"
+  check_documentation:
+    name: check documentation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+          working-directory: docs
+      - name: Generate documentation
+        run: bundle exec jekyll build --strict_front_matter --destination ./_site/fitbit-otp-auth-app --baseurl /fitbit-otp-auth-app # use `destination` to simulate non-root hosting for `htmlproofer`
+      - name: Check documentation (html-proofer)
+        run: bundle exec htmlproofer ./_site
   security_scan:
     name: security scan
     runs-on: ubuntu-latest

@@ -1,0 +1,5 @@
+#
+
+# Rails issue flagged due to /docs/Gemfile.lock, not relevant for generated documentation
+# see https://discuss.rubyonrails.org/t/cve-2023-28120-possible-xss-security-vulnerability-in-safebuffer-bytesplice/82469
+CVE-2023-28120

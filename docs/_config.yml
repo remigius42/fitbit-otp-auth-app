@@ -1,0 +1,28 @@
+plugins:
+  - jekyll-coffeescript
+  - jekyll-default-layout
+  - jekyll-gist
+  - jekyll-github-metadata
+  - jekyll-optional-front-matter
+  - jekyll-paginate
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+  - jekyll-relative-links
+title: OTP Auth
+description: Documentation of the Fitbit OTP Auth application
+lang: en
+collections_dir: collections
+collections:
+  app_de:
+    output: true
+  app_en:
+    output: true
+author: Andreas Remigius Schmidt
+email: remigius42-github.dcds7@aleeas.com
+theme: minima
+kramdown:
+  parse_block_html: true
+titles_from_headings:
+  enabled: true
+  strip_title: true
+  collections: true

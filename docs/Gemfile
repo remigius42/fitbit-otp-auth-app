@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem "github-pages", "~> 228"
+gem "webrick", "~> 1.8" # required for Ruby >= 3.0, see https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll?platform=mac#building-your-site-locally
+
+gem "html-proofer", "~> 5.0"
