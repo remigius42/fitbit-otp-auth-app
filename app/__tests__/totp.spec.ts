@@ -1,3 +1,5 @@
+/* spellchecker:ignore MJUXILTMPEXTEWRWMNFEITY */
+
 import { TotpConfig } from "../../common/TotpConfig"
 import { currentPeriod, totp } from "../totp"
 
@@ -117,6 +119,40 @@ describe("totp", () => {
     expect(totp(totpConfigMixedCaseSecret)).toBe(
       totp(totpConfigUpperCaseSecret)
     )
+  })
+
+  it("defaults to current period and not the next", () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(42 * 1000)
+    const totpConfig: TotpConfig = {
+      label: "some label",
+      secret: "MJUXILTMPEXTEWRWMNFEITY",
+      algorithm: "SHA1",
+      digits: "8",
+      period: "30"
+    }
+
+    expect(totp(totpConfig)).toBe(totp(totpConfig, false))
+    jest.useRealTimers()
+  })
+
+  it("when configured for next period returns the TOTP for the next period", () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(42 * 1000)
+    const SOME_PERIOD = 30
+    const totpConfig: TotpConfig = {
+      label: "some label",
+      secret: "MJUXILTMPEXTEWRWMNFEITY",
+      algorithm: "SHA1",
+      digits: "8",
+      period: String(SOME_PERIOD)
+    }
+
+    const totpForNextPeriod = totp(totpConfig, true)
+
+    jest.advanceTimersByTime(SOME_PERIOD * 1000)
+    expect(totpForNextPeriod).toBe(totp(totpConfig, false))
+    jest.useRealTimers()
   })
 
   it("currentPeriod returns the current period (starting at 0) based on the given duration in seconds", () => {

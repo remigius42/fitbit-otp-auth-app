@@ -138,14 +138,17 @@ class TokenPasswordCache {
   > = {}
 
   getPassword(totpConfig: TotpConfig) {
-    const { issuer, label, period: periodString } = totpConfig
+    const { issuer, label, period } = totpConfig
     this.ensureIssuerAndLabelAreRegistered(issuer, label)
-    const period = Number(periodString)
-    const currentPeriodIndex = currentPeriod(period)
-    if (!this.cache[issuer][label][currentPeriodIndex]) {
-      this.cache[issuer][label] = { [currentPeriodIndex]: totp(totpConfig) }
+
+    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+    if (!this.cache[issuer][label][currentPeriod]) {
+      this.cache[issuer][label] = { [currentPeriod]: totp(totpConfig) }
     }
-    return this.cache[issuer][label][currentPeriodIndex]
+    this.randomlyPreCacheNextPassword(totpConfig)
+    this.keepTwoCachedPasswordsByToken(totpConfig)
+
+    return this.cache[issuer][label][currentPeriod]
   }
 
   private ensureIssuerAndLabelAreRegistered(issuer: string, label: string) {
@@ -155,5 +158,36 @@ class TokenPasswordCache {
     if (!this.cache[issuer][label]) {
       this.cache[issuer][label] = {}
     }
+  }
+
+  private randomlyPreCacheNextPassword(totpConfig: TotpConfig) {
+    const { issuer, label, period } = totpConfig
+    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+    const nextPeriod = currentPeriod + 1
+
+    /* Looking at the pre-cache step as a binomial distribution where
+     * - the number of trials is 30 or greater (the usual period for TOTP is 30 seconds, resulting in 30 trials since the UI is updated once every second)
+     * - there should be at least one success
+     * using p = 0.15 should yield a > 99% probability that the password is pre-cached
+     */
+    if (!this.cache[issuer][label][nextPeriod] && Math.random() < 0.15) {
+      this.cache[issuer][label][nextPeriod] = totp(totpConfig, true)
+    }
+  }
+
+  private keepTwoCachedPasswordsByToken({ issuer, label, period }: TotpConfig) {
+    const currentPeriod = TokenPasswordCache.currentPeriod(period)
+    const currentPassword = this.cache[issuer][label][currentPeriod]
+    const nextPassword = this.cache[issuer][label][currentPeriod + 1]
+
+    this.cache[issuer][label] = {
+      [currentPeriod]: currentPassword,
+      [currentPeriod + 1]: nextPassword
+    }
+  }
+
+  private static currentPeriod(periodString: string) {
+    const period = Number(periodString)
+    return currentPeriod(period)
   }
 }

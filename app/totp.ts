@@ -12,7 +12,7 @@ import { base16decode, base16encode } from "./base16codec"
  * Calculate the current Time-based One-Time Password (TOTP) for a given TOTP
  * configuration.
  */
-export function totp(totpConfig: TotpConfig) {
+export function totp(totpConfig: TotpConfig, isForNextPeriod = false) {
   const {
     secret,
     algorithm,
@@ -24,7 +24,7 @@ export function totp(totpConfig: TotpConfig) {
   const period = Number(periodString)
 
   // Step 1 in https://www.rfc-editor.org/rfc/rfc4226#section-5.3
-  const messageHexString = counterHexString(period)
+  const messageHexString = counterHexString(period, isForNextPeriod)
   const keyBytes = base32decode(secret.toUpperCase(), "RFC4648")
   const keyBytesHexString = base16encode(keyBytes)
   const hashHexString = hmac(messageHexString, keyBytesHexString, algorithm)
@@ -50,8 +50,11 @@ export function totp(totpConfig: TotpConfig) {
  * See https://www.rfc-editor.org/rfc/rfc6238#page-12 and
  * https://www.rfc-editor.org/rfc/rfc6238#page-13 for further information.
  */
-function counterHexString(period: number) {
-  const periodHexString = currentPeriod(period).toString(16)
+function counterHexString(period: number, isForNextPeriod: boolean) {
+  const targetPeriod = isForNextPeriod
+    ? currentPeriod(period) + 1
+    : currentPeriod(period)
+  const periodHexString = targetPeriod.toString(16)
   return padStartWithZeros(periodHexString, 16)
 }
 

@@ -163,7 +163,7 @@ describe("TokenManager", () => {
     beforeEach(() => jest.setSystemTime(0))
     afterAll(() => jest.useRealTimers())
 
-    it("only calculates the TOTP once per period", () => {
+    it("only calculates the current TOTP once per period", () => {
       const tokenManager = new TokenManager()
       addTokensToTokenManager(tokenManager, [SOME_TOKEN])
       const totpSpy = jest.spyOn(totp, "totp")
@@ -175,7 +175,7 @@ describe("TokenManager", () => {
         jest.advanceTimersByTime(1000)
       }
 
-      expect(totpSpy).toBeCalledTimes(1)
+      expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
       totpSpy.mockRestore()
     })
 
@@ -240,17 +240,93 @@ describe("TokenManager", () => {
       addTokensToTokenManager(tokenManager, [SOME_TOKEN])
       const totpSpy = jest.spyOn(totp, "totp")
       tokenManager.getPassword(SOME_TOKEN)
-      expect(totpSpy).toBeCalledTimes(1)
+      expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
       const period = Number(SOME_TOKEN.period)
       jest.advanceTimersByTime(period * 1000) // advance to next period
-      tokenManager.getPassword(SOME_TOKEN)
-      expect(totpSpy).toBeCalledTimes(2)
+      tokenManager.getPassword(SOME_TOKEN) // call not asserted since it might have been pre-cached, instead clearing the spy
+      totpSpy.mockClear()
       jest.setSystemTime(0) // reset to previous period
 
       tokenManager.getPassword(SOME_TOKEN)
 
-      expect(totpSpy).toBeCalledTimes(3)
+      expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
       totpSpy.mockRestore()
+    })
+
+    describe("randomly pre-caches the next password while", () => {
+      let randomSpy: jest.SpyInstance
+      beforeAll(() => {
+        randomSpy = jest.spyOn(Math, "random").mockReturnValue(0) // since the comparison in the cache is `Math.random() < threshold` this will always trigger the pre-caching.
+      })
+      afterAll(() => randomSpy.mockRestore())
+
+      it("the pre-cached password matches the one which is manually calculated", () => {
+        const tokenManager = new TokenManager()
+        addTokensToTokenManager(tokenManager, [SOME_TOKEN])
+        const totpSpy = jest.spyOn(totp, "totp")
+        tokenManager.getPassword(SOME_TOKEN)
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+        totpSpy.mockClear()
+
+        const period = Number(SOME_TOKEN.period)
+        jest.advanceTimersByTime(period * 1000)
+        const preCachedPassword = tokenManager.getPassword(SOME_TOKEN)
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(0) // assert the password was pre-cached
+
+        tokenManager.getPassword(SOME_TOKEN)
+
+        expect(preCachedPassword).toBe(totp.totp(SOME_TOKEN))
+        totpSpy.mockRestore()
+      })
+
+      it("calculating the next password only once", () => {
+        const tokenManager = new TokenManager()
+        addTokensToTokenManager(tokenManager, [SOME_TOKEN])
+        const totpSpy = jest.spyOn(totp, "totp")
+        tokenManager.getPassword(SOME_TOKEN)
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+
+        tokenManager.getPassword(SOME_TOKEN)
+
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+        totpSpy.mockRestore()
+      })
+
+      it("preserving the current password", () => {
+        const tokenManager = new TokenManager()
+        addTokensToTokenManager(tokenManager, [SOME_TOKEN])
+        const totpSpy = jest.spyOn(totp, "totp")
+        tokenManager.getPassword(SOME_TOKEN)
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+
+        tokenManager.getPassword(SOME_TOKEN)
+
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        totpSpy.mockRestore()
+      })
+
+      // test by moving two periods ahead, which should yield two calls: one to calculate the current password and another which pre-caches the next (because Math.random() is overridden)
+      it("not keeping more than the current and the next password", () => {
+        const tokenManager = new TokenManager()
+        addTokensToTokenManager(tokenManager, [SOME_TOKEN])
+        const totpSpy = jest.spyOn(totp, "totp")
+        tokenManager.getPassword(SOME_TOKEN)
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+        totpSpy.mockClear()
+        const period = Number(SOME_TOKEN.period)
+        jest.advanceTimersByTime(2 * period * 1000)
+
+        tokenManager.getPassword(SOME_TOKEN)
+
+        expect(getTotpInvocationsForCurrentPeriod(totpSpy)).toBe(1)
+        expect(getTotpInvocationsForNextPeriod(totpSpy)).toBe(1)
+        expect(totpSpy).toBeCalledTimes(2)
+        totpSpy.mockRestore()
+      })
     })
   })
 
@@ -274,5 +350,21 @@ describe("TokenManager", () => {
     tokenManager.handleUpdateTokensMessage({
       type: "UPDATE_TOKENS_END_MESSAGE"
     })
+  }
+
+  function getTotpInvocationsForCurrentPeriod(
+    totpSpy: jest.SpyInstance<string, [TotpConfig, boolean?]>
+  ) {
+    return totpSpy.mock.calls.filter(
+      ([, isForNextPeriod]) => isForNextPeriod === undefined
+    ).length
+  }
+
+  function getTotpInvocationsForNextPeriod(
+    totpSpy: jest.SpyInstance<string, [TotpConfig, boolean?]>
+  ) {
+    return totpSpy.mock.calls.filter(
+      ([, isForNextPeriod]) => isForNextPeriod === true
+    ).length
   }
 })
