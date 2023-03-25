@@ -30,7 +30,11 @@ interface DocumentMock {
   getElementById: (
     id: string
   ) => GraphicsElement | VirtualTileListElement | undefined
-  location: { replace: (path: string) => Promise<void>; pathname: string }
+  location: {
+    assign: (path: string) => Promise<void>
+    replace: (path: string) => Promise<void>
+    pathname: string
+  }
 }
 
 const documentMock: DocumentMock = {
@@ -67,6 +71,10 @@ const documentMock: DocumentMock = {
     return this.elements[id]
   },
   location: {
+    assign(this: DocumentMock["location"], path: string) {
+      this.pathname = path
+      return Promise.resolve()
+    },
     pathname: INDEX_VIEW_PATH,
     replace(this: DocumentMock["location"], path: string) {
       this.pathname = path

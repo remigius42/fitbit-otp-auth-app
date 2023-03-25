@@ -42,7 +42,9 @@ export async function updateUi(
 
 async function showNoTokensAvailableMessage() {
   clock.ontick = undefined
-  await document.location.replace(ADD_TOKENS_VIEW_PATH)
+  if (document.location.pathname !== ADD_TOKENS_VIEW_PATH) {
+    await document.location.replace(ADD_TOKENS_VIEW_PATH)
+  }
 }
 
 async function showTokens(
@@ -52,9 +54,11 @@ async function showTokens(
   const viewPath = settingsManager.getSettings().shouldUseLargeTokenView
     ? TOKENS_VIEW_LARGE_PATH
     : TOKENS_VIEW_PATH
-  await document.location.replace(viewPath)
-  setupTokenList(tokenManager)
-  setupRefreshOncePerSecond(tokenManager)
+  if (document.location.pathname !== viewPath) {
+    await document.location.replace(viewPath)
+    setupTokenList(tokenManager)
+    setupRefreshOncePerSecond(tokenManager)
+  }
 }
 
 function setupRefreshOncePerSecond(tokenManager: TokenManager) {

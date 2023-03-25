@@ -28,6 +28,7 @@ import * as tokens from "../tokens"
 
 describe("ui", () => {
   beforeAll(() => jest.useFakeTimers())
+  beforeEach(() => jest.clearAllMocks())
 
   describe("registerDelayedMessageWhetherDeviceIsConnected", () => {
     describe("if the current view is the index view", () => {
@@ -119,16 +120,72 @@ describe("ui", () => {
 
           expect(documentMock.location.pathname).toBe(TOKENS_VIEW_LARGE_PATH)
         })
+
+        it("only changes the document location to the default token view if necessary to prevent flickering", async () => {
+          const settingsManager = new SettingsManager()
+          settingsManager.updateSettings({
+            type: "UPDATE_SETTINGS_MESSAGE",
+            updatedSettings: { shouldUseLargeTokenView: false }
+          })
+          await document.location.replace(TOKENS_VIEW_PATH)
+          const replaceSpy = jest.spyOn(document.location, "replace")
+          const assignSpy = jest.spyOn(document.location, "assign")
+
+          await updateUi(tokenManagerWithTokens, settingsManager)
+
+          expect(replaceSpy).not.toBeCalled()
+          expect(assignSpy).not.toBeCalled()
+          replaceSpy.mockRestore()
+          assignSpy.mockRestore()
+        })
+
+        it("only changes the document location to the large token view if necessary to prevent flickering", async () => {
+          const settingsManager = new SettingsManager()
+          settingsManager.updateSettings({
+            type: "UPDATE_SETTINGS_MESSAGE",
+            updatedSettings: { shouldUseLargeTokenView: true }
+          })
+          await document.location.replace(TOKENS_VIEW_LARGE_PATH)
+          const replaceSpy = jest.spyOn(document.location, "replace")
+          const assignSpy = jest.spyOn(document.location, "assign")
+
+          await updateUi(tokenManagerWithTokens, settingsManager)
+
+          expect(replaceSpy).not.toBeCalled()
+          expect(assignSpy).not.toBeCalled()
+          replaceSpy.mockRestore()
+          assignSpy.mockRestore()
+        })
       })
 
       it("registers an ontick listener", async () => {
-        const clockMock = jest.mocked(clock)
-        clockMock.ontick = undefined
+        clock.ontick = undefined
 
         await updateUi(tokenManagerWithTokens, dummySettingsManager)
 
-        expect(clockMock.ontick).toBeDefined()
+        expect(clock.ontick).toBeDefined()
       })
+
+      it.each([
+        { viewPath: TOKENS_VIEW_PATH, shouldUseLargeTokenView: false },
+        { viewPath: TOKENS_VIEW_LARGE_PATH, shouldUseLargeTokenView: true }
+      ])(
+        "only registers an ontick listener if not already on the correct view for view $viewPath",
+        async ({ viewPath, shouldUseLargeTokenView }) => {
+          const settingsManager = new SettingsManager()
+          settingsManager.updateSettings({
+            type: "UPDATE_SETTINGS_MESSAGE",
+            updatedSettings: { shouldUseLargeTokenView }
+          })
+          const someOnTickHandler = jest.fn()
+          await document.location.replace(viewPath)
+          clock.ontick = someOnTickHandler
+
+          await updateUi(tokenManagerWithTokens, settingsManager)
+
+          expect(clock.ontick).toBe(someOnTickHandler)
+        }
+      )
 
       describe("registers an ontick listener which", () => {
         it("sets the clock granularity to seconds", async () => {
@@ -152,6 +209,27 @@ describe("ui", () => {
           updateTokenListSpy.mockRestore()
         })
       })
+
+      it.each([
+        { viewPath: TOKENS_VIEW_PATH, shouldUseLargeTokenView: false },
+        { viewPath: TOKENS_VIEW_LARGE_PATH, shouldUseLargeTokenView: true }
+      ])(
+        "does not setup the token list if already on the view $viewPath",
+        async ({ viewPath, shouldUseLargeTokenView }) => {
+          const settingsManager = new SettingsManager()
+          settingsManager.updateSettings({
+            type: "UPDATE_SETTINGS_MESSAGE",
+            updatedSettings: { shouldUseLargeTokenView }
+          })
+          const setupTokenListSpy = jest.spyOn(tokens, "setupTokenList")
+          await document.location.replace(viewPath)
+
+          await updateUi(tokenManagerWithTokens, settingsManager)
+
+          expect(setupTokenListSpy).not.toBeCalled()
+          setupTokenListSpy.mockRestore()
+        }
+      )
     })
 
     describe("if the token manager has no tokens", () => {
@@ -163,6 +241,18 @@ describe("ui", () => {
         await updateUi(tokenManagerWithoutTokens, dummySettingsManager)
 
         expect(documentMock.location.pathname).toBe(ADD_TOKENS_VIEW_PATH)
+      })
+
+      it("only changes the document location if necessary to prevent flickering", async () => {
+        const replaceSpy = jest.spyOn(document.location, "replace")
+        const assignSpy = jest.spyOn(document.location, "assign")
+
+        await updateUi(tokenManagerWithoutTokens, dummySettingsManager)
+
+        expect(replaceSpy).not.toBeCalled()
+        expect(assignSpy).not.toBeCalled()
+        replaceSpy.mockRestore()
+        assignSpy.mockRestore()
       })
 
       it("clears the ontick listener", async () => {
