@@ -33,6 +33,9 @@ msgstr "Neues QR-Tag importieren"
 msgid "Import QR tag from an image"
 msgstr "QR-Tag via Bild importieren"
 
+msgid "Introduction"
+msgstr "Einführung"
+
 msgid "Issuer"
 msgstr "Aussteller"
 
@@ -77,3 +80,9 @@ msgid "Token"
 
 msgid "Tokens section description"
 msgstr "Sie können Anzeigenamen für die Token festlegen, indem Sie auf die Listeneinträge klicken. Um die Token auf die ursprüngliche Bezeichnung und Aussteller zurückzusetzen, klicken Sie auf den Eintrag, löschen sie den Anzeigenamen und speichern Sie."
+
+msgid "User documentation"
+msgstr "Benutzerdokumentation"
+
+msgid "Welcome to the OTP Auth App!"
+msgstr "Willkommen zur OTP Auth App!"

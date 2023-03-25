@@ -31,6 +31,9 @@ msgstr "Import new QR tag"
 msgid "Import QR tag from an image"
 msgstr "Import QR tag from an image"
 
+msgid "Introduction"
+msgstr "Introduction"
+
 msgid "Issuer"
 msgstr "Issuer"
 
@@ -75,3 +78,9 @@ msgstr "Tokens"
 
 msgid "Tokens section description"
 msgstr "You can set custom names for tokens by clicking on the list entries. To revert a token to the original label and issuer, click on the entry, delete the custom name and save."
+
+msgid "User documentation"
+msgstr "User documentation"
+
+msgid "Welcome to the OTP Auth App!"
+msgstr "Welcome to the OTP Auth App!"
