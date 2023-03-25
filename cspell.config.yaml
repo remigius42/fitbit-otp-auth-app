@@ -17,6 +17,9 @@ words:
   - andreas
   - commitlint
   - fitbit
+  - gettext
+  - msgid
+  - msgstr
   - remigius
   - stylelint
   - totp
@@ -25,3 +28,6 @@ ignoreWords:
   - tsdoc
 import: ["@cspell/dict-de-ch/cspell-ext.json"]
 flagWords: []
+overrides:
+  - filename: "**/i18n/de-DE.po"
+    dictionaries: ["!!de-ch"]

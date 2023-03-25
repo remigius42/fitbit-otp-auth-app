@@ -1,0 +1,5 @@
+msgid "License information"
+msgstr "Lizenzinformationen"
+
+msgid "Third-party licenses"
+msgstr "Lizenzen von Drittanbietern"
