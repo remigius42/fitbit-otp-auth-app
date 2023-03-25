@@ -1,0 +1,74 @@
+# spellchecker:words Fairphone
+
+# The relevant documentation can be found at
+# - https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository#creating-issue-forms
+# - https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping to make this project better and for taking the
+        time to fill out this bug report!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: What version of this project are you running?
+      options:
+        - 1.0 (Default)
+    validations:
+      required: true
+  - type: input
+    id: device-model
+    attributes:
+      label: Fitbit device model
+      description: What is the model of your Fitbit device on which you experience the issue?
+      placeholder: Versa 3
+    validations:
+      required: true
+  - type: input
+    id: cellphone-model
+    attributes:
+      label: Cellphone model
+      description: What is the model of your cellphone which is coupled to your Fitbit device?
+      placeholder: Fairphone 3
+    validations:
+      required: true
+  - type: checkboxes
+    id: formalities
+    attributes:
+      label: Formalities
+      description: |
+        By submitting this issue
+
+        - you agree to follow the [Code of Conduct](https://github.com/remigius42/fitbit-otp-auth-app/CODE_OF_CONDUCT.md) of this project
+        - you confirm that you have read the [frequently asked questions of this project](https://remigius42.github.io/fitbit-otp-auth-app/app/faq) and you are certain, that they don't contain an answer to your issue
+        - you confirm that you have had a look at the [existing issues](https://github.com/remigius42/fitbit-otp-auth-app/issues) and you are certain that this issue would not be a duplicate
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+        - label: I confirm that I have read the FAQ and that my issue not covered within
+          required: true
+        - label: I confirm that I have looked at the already reported issues and I am sure that this issue would not be a duplicate
+          required: true
