@@ -10,6 +10,7 @@ ignorePaths:
   - "/.vscode"
   - "/build"
   - "/coverage"
+  - "/settings/licenses.js"
 dictionaryDefinitions: []
 dictionaries: ["!de-ch"]
 words:
@@ -20,6 +21,7 @@ words:
   - stylelint
   - totp
 ignoreWords:
+  - rseidelsohn
   - tsdoc
 import: ["@cspell/dict-de-ch/cspell-ext.json"]
 flagWords: []
