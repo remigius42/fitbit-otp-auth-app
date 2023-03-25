@@ -10,4 +10,4 @@ registerSettingsPage(({ settings }) => (
       <Text>Hello world!</Text>
     </Section>
   </Page>
-));
+))
