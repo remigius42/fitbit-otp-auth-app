@@ -2,6 +2,7 @@ import * as messaging from "messaging"
 import { settingsStorage } from "settings"
 import { PeerMessage } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
+import { isCompensatingClockDrift } from "./settings"
 import { TOKENS_SETTINGS_KEY } from "./tokens"
 
 export function sendTokensWhenDeviceIsReady() {
@@ -32,7 +33,9 @@ export function sendTokensToDevice(tokens: Array<TotpConfig>) {
   sendMessageToDevice({
     type: "UPDATE_TOKENS_START_MESSAGE",
     count: tokens.length,
-    secondsSinceEpochInCompanion: Date.now() / 1000
+    secondsSinceEpochInCompanion: isCompensatingClockDrift()
+      ? Date.now() / 1000
+      : undefined
   })
 
   tokens.forEach((token, index) =>

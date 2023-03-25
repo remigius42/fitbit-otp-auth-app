@@ -5,6 +5,7 @@ import {
   sendTokensToDevice,
   sendTokensWhenDeviceIsReady
 } from "./peerMessaging"
+import { fallbackToDefaultSettings } from "./settings"
 import {
   addTokenFromQrTag,
   addTokenManually,
@@ -15,12 +16,14 @@ import {
 import { clearAddTokenManuallyFieldsViaSettings } from "./ui/fields"
 import { NewTokenButton } from "./ui/NewTokenButton"
 import { NewTokenFieldNameValues } from "./ui/NewTokenFieldName"
+import { SettingsButton } from "./ui/SettingsButton"
 import {
   clearAllValidationMessages,
   clearAllValidationMessagesForManualTokens
 } from "./ui/validation"
 
 export async function initialize() {
+  fallbackToDefaultSettings()
   clearAllValidationMessages()
   /* Process the QR tag image if one is set. This is possible if the companion
    * app had been unloaded before an image was selected and the resulting
@@ -58,6 +61,8 @@ function addSettingsChangeListener() {
     } else if (key === TOKENS_SETTINGS_KEY) {
       const tokens = JSON.parse(newValue) as Array<TotpConfig>
       sendTokensToDevice(tokens)
+    } else if (key === SettingsButton.compensateClockDrift) {
+      sendCurrentTokensToDevice()
     }
   })
 }

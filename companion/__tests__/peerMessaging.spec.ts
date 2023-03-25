@@ -12,9 +12,21 @@ import {
   sendTokensWhenDeviceIsReady
 } from "../peerMessaging"
 import { TOKENS_SETTINGS_KEY } from "../tokens"
+import { SettingsButton } from "../ui/SettingsButton"
 
 describe("peerMessaging", () => {
-  beforeEach(jest.clearAllMocks)
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    const settingsStorageMock = jest.mocked(settings).settingsStorage
+    settingsStorageMock.getItem.mockImplementation((key: string) => {
+      if (key === TOKENS_SETTINGS_KEY) {
+        return SOME_JSON_STRINGIFIED_TOKENS
+      } else if (key === SettingsButton.compensateClockDrift) {
+        return "true"
+      }
+    })
+  })
   afterEach(() => {
     const peerSocketMock = jest.mocked(messaging).peerSocket
     ;(peerSocketMock as unknown as PeerSocketMock).mockReset()
@@ -37,10 +49,6 @@ describe("peerMessaging", () => {
   describe("sendTokensWhenDeviceIsReady", () => {
     it("sends the current tokens as soon the device is ready", () => {
       const peerSocketMock = jest.mocked(messaging).peerSocket
-      const settingsStorageMock = jest.mocked(settings).settingsStorage
-      settingsStorageMock.getItem.mockImplementation(
-        () => SOME_JSON_STRINGIFIED_TOKENS
-      )
 
       sendTokensWhenDeviceIsReady()
       ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
@@ -54,10 +62,6 @@ describe("peerMessaging", () => {
 
     it("does not send the tokens if the device is not ready", () => {
       const peerSocketMock = jest.mocked(messaging).peerSocket
-      const settingsStorageMock = jest.mocked(settings).settingsStorage
-      settingsStorageMock.getItem.mockImplementation(
-        () => SOME_JSON_STRINGIFIED_TOKENS
-      )
 
       sendTokensWhenDeviceIsReady()
 
@@ -70,6 +74,8 @@ describe("peerMessaging", () => {
       settingsStorageMock.getItem.mockImplementation(key => {
         if (key === TOKENS_SETTINGS_KEY) {
           return undefined
+        } else if (key === SettingsButton.compensateClockDrift) {
+          return "true"
         }
       })
 
@@ -88,13 +94,6 @@ describe("peerMessaging", () => {
   })
 
   describe("sendTokensToDevice", () => {
-    beforeEach(() => {
-      const settingsStorageMock = jest.mocked(settings).settingsStorage
-      settingsStorageMock.getItem.mockImplementation(
-        () => SOME_JSON_STRINGIFIED_TOKENS
-      )
-    })
-
     it("sends tokens individually", () => {
       const peerSocketMock = jest.mocked(messaging).peerSocket
       ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
@@ -139,7 +138,7 @@ describe("peerMessaging", () => {
       })
     })
 
-    it("sends the current seconds since epoch in the start message", () => {
+    it("sends the current seconds since epoch in the start message if clock drift is compensated", () => {
       const SOME_SECONDS_SINCE_EPOCH = 42
       jest.useFakeTimers()
       jest.setSystemTime(SOME_SECONDS_SINCE_EPOCH * 1000)
@@ -152,6 +151,35 @@ describe("peerMessaging", () => {
         type: "UPDATE_TOKENS_START_MESSAGE",
         count: expect.any(Number) as number,
         secondsSinceEpochInCompanion: 42
+      })
+      jest.useRealTimers()
+    })
+
+    it("does not send the current seconds since epoch in the start message if clock drift compensation is disabled", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      jest.useFakeTimers()
+      jest.setSystemTime(SOME_SECONDS_SINCE_EPOCH * 1000)
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(key => {
+        if (key === TOKENS_SETTINGS_KEY) {
+          return SOME_JSON_STRINGIFIED_TOKENS
+        } else if (key === SettingsButton.compensateClockDrift) {
+          return "false"
+        }
+      })
+
+      sendTokensToDevice(SOME_TOKENS)
+
+      expect(peerSocketMock.send).not.toBeCalledWith({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: expect.any(Number) as number,
+        secondsSinceEpochInCompanion: expect.any(Number) as number
+      })
+      expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: expect.any(Number) as number
       })
       jest.useRealTimers()
     })

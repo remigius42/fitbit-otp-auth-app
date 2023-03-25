@@ -1,4 +1,4 @@
-# spellchecker:words tokenalgorithmus
+# spellchecker:words tokenalgorithmus, uhrenfehler
 
 msgid "Add token"
 msgstr "Token hinzufügen"
@@ -11,6 +11,9 @@ msgstr "Token via QR-Tag hinzufügen"
 
 msgid "Algorithm"
 msgstr "Algorithmus"
+
+msgid "Compensate clock drift"
+msgstr "Uhrenfehler kompensieren"
 
 msgid "Current QR tag image."
 msgstr "Aktuelles QR-Tag Bild."
@@ -50,6 +53,9 @@ msgstr "Anzahl Ziffern auswählen"
 
 msgid "Select token algorithm"
 msgstr "Tokenalgorithmus auswählen"
+
+msgid "Settings"
+msgstr "Einstellungen"
 
 msgid "Third-party licenses"
 msgstr "Lizenzen von Drittanbietern"

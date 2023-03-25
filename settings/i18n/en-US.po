@@ -10,6 +10,9 @@ msgstr "Add token via QR tag"
 msgid "Algorithm"
 msgstr "Algorithm"
 
+msgid "Compensate clock drift"
+msgstr "Compensate clock drift"
+
 msgid "Current QR tag image."
 msgstr "Current QR tag image."
 
@@ -48,6 +51,9 @@ msgstr "Select number of digits"
 
 msgid "Select token algorithm"
 msgstr "Select token algorithm"
+
+msgid "Settings"
+msgstr "Settings"
 
 msgid "Third-party licenses"
 msgstr "Third-party licenses"

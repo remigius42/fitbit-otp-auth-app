@@ -12,6 +12,7 @@ import type { TotpConfig } from "../../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../../settings/ui"
 import { initialize } from "../companion"
 import * as peerMessaging from "../peerMessaging"
+import * as companionSettings from "../settings"
 import * as tokens from "../tokens"
 import * as fields from "../ui/fields"
 import { NewTokenButton } from "../ui/NewTokenButton"
@@ -19,16 +20,38 @@ import {
   NewTokenFieldName,
   NewTokenFieldNameValues
 } from "../ui/NewTokenFieldName"
+import { SettingsButton } from "../ui/SettingsButton"
 import * as validation from "../ui/validation"
 
 describe("companion", () => {
-  beforeEach(() => jest.resetAllMocks())
+  beforeEach(() => {
+    jest.resetAllMocks()
+
+    const settingsStorageMock = jest.mocked(settings).settingsStorage
+    settingsStorageMock.getItem.mockImplementation((key: string) => {
+      if (key === SettingsButton.compensateClockDrift) {
+        return "true"
+      }
+    })
+  })
 
   const SOME_IMAGE_URI = "some URI"
   const SOME_PICKED_IMAGE_VALUE = JSON.stringify({ imageUri: SOME_IMAGE_URI })
 
   describe("initialize", () => {
     const SOME_STRINGIFIED_JSON = '"some stringified JSON"'
+
+    it("calls function to ensure fallbacks to settings defaults", () => {
+      const fallbackToDefaultSettingsSpy = jest.spyOn(
+        companionSettings,
+        "fallbackToDefaultSettings"
+      )
+
+      void initialize()
+
+      expect(fallbackToDefaultSettingsSpy).toBeCalled()
+      fallbackToDefaultSettingsSpy.mockRestore()
+    })
 
     it("calls function to clear all validation messages", () => {
       const clearAllValidationMessagesSpy = jest.spyOn(
@@ -50,6 +73,8 @@ describe("companion", () => {
       settingsStorageMock.getItem.mockImplementation((key: string) => {
         if (key === NewTokenButton.addTokenViaQrTag) {
           return SOME_PICKED_IMAGE_VALUE
+        } else if (key === SettingsButton.compensateClockDrift) {
+          return "true"
         }
       })
 
@@ -283,6 +308,25 @@ describe("companion", () => {
         )
       })
 
+      it("sends tokens to device to update the clock drift when the setting is changed", () => {
+        const settingsStorageMock = setupSettingsStorageMock(
+          SettingsButton.compensateClockDrift,
+          "true"
+        )
+        const sendTokensToDeviceSpy = jest.spyOn(
+          peerMessaging,
+          "sendTokensToDevice"
+        )
+        void initialize()
+
+        settingsStorageMock.setItem(
+          SettingsButton.compensateClockDrift,
+          "false"
+        )
+
+        expect(sendTokensToDeviceSpy).toBeCalled()
+      })
+
       function setupSettingsStorageMock(
         eventKey: string,
         newValue = '"some new value JSON"'
@@ -302,6 +346,8 @@ describe("companion", () => {
         settingsStorageMock.getItem.mockImplementation(key => {
           if (key === tokens.TOKENS_SETTINGS_KEY) {
             return JSON.stringify([SOME_TOKEN])
+          } else if (key === SettingsButton.compensateClockDrift) {
+            return "true"
           }
         })
         settingsStorageMock.addEventListener.mockImplementation(
@@ -313,6 +359,8 @@ describe("companion", () => {
                     return value
                   } else if (getKey === tokens.TOKENS_SETTINGS_KEY) {
                     return JSON.stringify([SOME_TOKEN])
+                  } else if (getKey === SettingsButton.compensateClockDrift) {
+                    return "true"
                   }
                 })
                 if (key === eventKey) {
