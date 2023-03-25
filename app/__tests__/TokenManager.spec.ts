@@ -551,6 +551,70 @@ describe("TokenManager", () => {
     })
   })
 
+  describe("tryRestoreFromDevice", () => {
+    describe("if the tokens are not stored on the device", () => {
+      beforeEach(() => {
+        const fsMock = jest.mocked(fs)
+        fsMock.existsSync.mockImplementation((filename: string) =>
+          filename === TokenManager.TOKENS_CBOR_PATH ? false : true
+        )
+      })
+
+      it("does not try to read the file", () => {
+        const tokenManager = new TokenManager()
+        const fsMock = jest.mocked(fs)
+
+        tokenManager.tryRestoreFromDevice()
+
+        expect(fsMock.readFileSync).not.toBeCalled()
+      })
+
+      it("does not notify the observers", () => {
+        const tokenManager = new TokenManager()
+        const observerMock = jest.fn()
+        tokenManager.registerObserver(observerMock)
+
+        tokenManager.tryRestoreFromDevice()
+
+        expect(observerMock).not.toBeCalled()
+      })
+    })
+
+    describe("if the tokens are stored on the device", () => {
+      const TOKENS_STORED_ON_DEVICE = [SOME_TOKEN, SOME_OTHER_TOKEN]
+
+      beforeEach(() => {
+        const fsMock = jest.mocked(fs)
+        fsMock.existsSync.mockImplementation((filename: string) =>
+          filename === TokenManager.TOKENS_CBOR_PATH ? true : false
+        )
+        fsMock.readFileSync.mockImplementation((filename: string) => {
+          if (filename === TokenManager.TOKENS_CBOR_PATH) {
+            return TOKENS_STORED_ON_DEVICE
+          }
+        })
+      })
+
+      it("sets the tokens to the ones on the device", () => {
+        const tokenManager = new TokenManager()
+
+        tokenManager.tryRestoreFromDevice()
+
+        expect(tokenManager.getTokens()).toStrictEqual(TOKENS_STORED_ON_DEVICE)
+      })
+
+      it("does notify the observers", () => {
+        const tokenManager = new TokenManager()
+        const observerMock = jest.fn()
+        tokenManager.registerObserver(observerMock)
+
+        tokenManager.tryRestoreFromDevice()
+
+        expect(observerMock).toBeCalled()
+      })
+    })
+  })
+
   function addTokensToTokenManager(
     tokenManager: TokenManager,
     tokens: Array<TotpConfig>,

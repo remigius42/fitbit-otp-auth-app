@@ -14,6 +14,7 @@ export function initialize() {
   registerPeerSocketListener()
   registerDelayedMessageWhetherDeviceIsConnected()
   tokenManager.registerObserver(tokensAvailableObserver)
+  tokenManager.tryRestoreFromDevice()
 }
 
 function registerPeerSocketListener() {

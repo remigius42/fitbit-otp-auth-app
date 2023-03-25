@@ -70,6 +70,18 @@ export class TokenManager {
     return this.passwordCache.getClockDrift()
   }
 
+  tryRestoreFromDevice() {
+    if (fs.existsSync(TokenManager.TOKENS_CBOR_PATH)) {
+      const restoredTokens = fs.readFileSync(
+        TokenManager.TOKENS_CBOR_PATH,
+        "cbor"
+      ) as Array<TotpConfig>
+      this.tokens.length = 0
+      restoredTokens.forEach(token => this.tokens.push(token))
+      this.notifyObservers()
+    }
+  }
+
   private updateTokens() {
     this.tokens.length = 0
     this.updateTokensBuffer

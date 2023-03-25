@@ -7,6 +7,7 @@ export const fsMockFactory = () => {
 
 const fsMock = {
   existsSync: jest.fn(),
+  readFileSync: jest.fn(),
   unlinkSync: jest.fn(),
   writeFileSync: jest.fn()
 }

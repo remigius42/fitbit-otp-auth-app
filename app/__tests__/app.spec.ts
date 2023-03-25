@@ -130,5 +130,16 @@ describe("app", () => {
         peerSocketMock.receive({ data: END_MESSAGE })
       }
     })
+
+    it("invokes method on token manager to try to restore the tokens", () => {
+      const tryRestoreFromDeviceSpy = jest.spyOn(
+        TokenManager.prototype,
+        "tryRestoreFromDevice"
+      )
+
+      initialize()
+
+      expect(tryRestoreFromDeviceSpy).toBeCalled()
+    })
   })
 })
