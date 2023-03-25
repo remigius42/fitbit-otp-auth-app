@@ -2,6 +2,11 @@
 
 Copyright 2023 binary poetry gmbh. All rights reserved.
 
+[![Build status](https://github.com/remigius42/fitbit-otp-auth-app/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/remigius42/fitbit-otp-auth-app/actions/workflows/node.js.yml)
+![Current app version](https://img.shields.io/github/package-json/v/remigius42/fitbit-otp-auth-app)
+[![Codacy Badge grade](https://app.codacy.com/project/badge/Grade/e65bee5724ee4258a97474ce4783ee0d)](https://app.codacy.com/gh/remigius42/fitbit-otp-auth-app/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge coverage](https://app.codacy.com/project/badge/Coverage/e65bee5724ee4258a97474ce4783ee0d)](https://app.codacy.com/gh/remigius42/fitbit-otp-auth-app/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
+
 With `fitbit-otp-auth-app` you can store your [time-based one time
 passwords
 (TOTP)](https://en.wikipedia.org/wiki/Time-based_one-time_password) on

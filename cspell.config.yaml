@@ -30,6 +30,7 @@ dictionaries: ["!de-ch"]
 words:
   - andreas
   - cbor
+  - codacy
   - commitlint
   - fitbit
   - gettext
