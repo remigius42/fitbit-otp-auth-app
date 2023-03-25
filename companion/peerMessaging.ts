@@ -5,9 +5,9 @@ import { ColorSchemeName } from "../common/ColorSchemes"
 import { PeerMessage } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
 import { isCompensatingClockDrift, isStoringTokensOnDevice } from "./settings"
-import { TOKENS_SETTINGS_KEY } from "./tokens"
 import { signalConnected, signalDisconnected } from "./ui/connectionStatus"
 import { SettingsButton } from "./ui/SettingsButton"
+import { TOKENS_SETTINGS_KEY } from "./ui/settingsKeys"
 
 export function monitorConnectionState() {
   messaging.peerSocket.addEventListener("open", signalConnected)

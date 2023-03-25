@@ -19,12 +19,11 @@ import {
   NewTokenFieldName,
   NewTokenFieldNameValues
 } from "./ui/NewTokenFieldName"
+import { TOKENS_SETTINGS_KEY } from "./ui/settingsKeys"
 import {
   clearAllValidationMessages,
   updateValidationForField
 } from "./ui/validation"
-
-export const TOKENS_SETTINGS_KEY = "tokens"
 
 type TotpConfigInput = Omit<TotpConfig, "displayName">
 

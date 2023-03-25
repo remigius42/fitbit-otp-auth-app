@@ -36,7 +36,6 @@ import {
   addTokenToSettings,
   getErrorMessageForDuplicateToken,
   getMatchingExistingToken,
-  TOKENS_SETTINGS_KEY,
   updateDisplayName,
   validateNewManualToken
 } from "../tokens"
@@ -46,6 +45,7 @@ import {
   NewTokenFieldName,
   NewTokenFieldNameValues
 } from "../ui/NewTokenFieldName"
+import { TOKENS_SETTINGS_KEY } from "../ui/settingsKeys"
 import * as validation from "../ui/validation"
 
 describe("tokens", () => {

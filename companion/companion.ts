@@ -13,7 +13,6 @@ import { fallbackToDefaultSettings } from "./settings"
 import {
   addTokenFromQrTag,
   addTokenManually,
-  TOKENS_SETTINGS_KEY,
   updateDisplayName,
   validateNewManualToken
 } from "./tokens"
@@ -21,6 +20,7 @@ import { clearAddTokenManuallyFieldsViaSettings } from "./ui/fields"
 import { NewTokenButton } from "./ui/NewTokenButton"
 import { NewTokenFieldNameValues } from "./ui/NewTokenFieldName"
 import { SettingsButton } from "./ui/SettingsButton"
+import { TOKENS_SETTINGS_KEY } from "./ui/settingsKeys"
 import {
   clearAllValidationMessages,
   clearAllValidationMessagesForManualTokens

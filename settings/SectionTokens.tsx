@@ -2,6 +2,7 @@ import { gettext } from "i18n"
 import { getDisplayName } from "../common/formatTokens"
 import type { TotpConfig } from "../common/TotpConfig"
 import { NewTokenButton } from "../companion/ui/NewTokenButton"
+import { TOKENS_SETTINGS_KEY } from "../companion/ui/settingsKeys"
 import ConnectionStatus from "./ConnectionStatus"
 import {
   getValidationMessageSetting,
@@ -24,9 +25,8 @@ export function SectionTokens({ settingsStorage }) {
       }
       description={<Text>{gettext("Tokens section description")}</Text>}
     >
-      {/* Note that the `settingsKey` is deliberately not set to TOKENS_SETTINGS_KEY because doing so would import /companion/tokens.ts which would break the build due to `settingsStorage` not being importable from within settings */}
       <AdditiveList
-        settingsKey="tokens"
+        settingsKey={TOKENS_SETTINGS_KEY}
         renderItem={token => (
           <TextInput
             placeholder=""

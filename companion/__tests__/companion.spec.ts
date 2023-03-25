@@ -22,6 +22,7 @@ import {
   NewTokenFieldNameValues
 } from "../ui/NewTokenFieldName"
 import { SettingsButton } from "../ui/SettingsButton"
+import { TOKENS_SETTINGS_KEY } from "../ui/settingsKeys"
 import * as validation from "../ui/validation"
 
 describe("companion", () => {
@@ -328,7 +329,7 @@ describe("companion", () => {
       it("sends updates of the tokens setting to the device", () => {
         const SOME_STRINGIFIED_ARRAY = '["some array element"]'
         const settingsStorageMock = setupSettingsStorageMock(
-          tokens.TOKENS_SETTINGS_KEY,
+          TOKENS_SETTINGS_KEY,
           SOME_STRINGIFIED_ARRAY
         )
         const sendTokensToDeviceSpy = jest.spyOn(
@@ -337,10 +338,7 @@ describe("companion", () => {
         )
         void initialize()
 
-        settingsStorageMock.setItem(
-          tokens.TOKENS_SETTINGS_KEY,
-          SOME_STRINGIFIED_ARRAY
-        )
+        settingsStorageMock.setItem(TOKENS_SETTINGS_KEY, SOME_STRINGIFIED_ARRAY)
 
         expect(sendTokensToDeviceSpy).toBeCalledWith(
           JSON.parse(SOME_STRINGIFIED_ARRAY)
@@ -435,7 +433,7 @@ describe("companion", () => {
         }
         const settingsStorageMock = jest.mocked(settings).settingsStorage
         settingsStorageMock.getItem.mockImplementation(key => {
-          if (key === tokens.TOKENS_SETTINGS_KEY) {
+          if (key === TOKENS_SETTINGS_KEY) {
             return JSON.stringify([SOME_TOKEN])
           } else if (key === SettingsButton.compensateClockDrift) {
             return "true"
@@ -448,7 +446,7 @@ describe("companion", () => {
                 settingsStorageMock.getItem.mockImplementation(getKey => {
                   if (getKey === key) {
                     return value
-                  } else if (getKey === tokens.TOKENS_SETTINGS_KEY) {
+                  } else if (getKey === TOKENS_SETTINGS_KEY) {
                     return JSON.stringify([SOME_TOKEN])
                   } else if (getKey === SettingsButton.compensateClockDrift) {
                     return "true"

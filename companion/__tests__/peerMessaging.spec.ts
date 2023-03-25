@@ -16,9 +16,9 @@ import {
   sendTokensWhenDeviceIsReady,
   updateSettings
 } from "../peerMessaging"
-import { TOKENS_SETTINGS_KEY } from "../tokens"
 import * as connectionStatus from "../ui/connectionStatus"
 import { SettingsButton } from "../ui/SettingsButton"
+import { TOKENS_SETTINGS_KEY } from "../ui/settingsKeys"
 
 describe("peerMessaging", () => {
   beforeEach(() => {
