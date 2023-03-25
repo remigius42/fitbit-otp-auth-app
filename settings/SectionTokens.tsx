@@ -1,8 +1,8 @@
 import { gettext } from "i18n"
-import { TotpConfig } from "../companion/tokens"
+import { getDisplayName } from "../common/formatTokens"
+import type { TotpConfig } from "../common/TotpConfig"
 import { NewTokenButton } from "../companion/ui/NewTokenButton"
 import {
-  getDisplayName,
   getValidationMessageSetting,
   UPDATE_DISPLAY_NAME_SETTINGS_KEY
 } from "./ui"

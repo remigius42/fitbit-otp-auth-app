@@ -6,11 +6,12 @@ jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
 import * as messaging from "messaging"
 import * as settings from "settings"
+import type { TotpConfig } from "../../common/TotpConfig"
 import {
   sendTokensToDevice,
   sendTokensWhenDeviceIsReady
 } from "../peerMessaging"
-import { TOKENS_SETTINGS_KEY, TotpConfig } from "../tokens"
+import { TOKENS_SETTINGS_KEY } from "../tokens"
 
 describe("peerMessaging", () => {
   beforeEach(jest.clearAllMocks)

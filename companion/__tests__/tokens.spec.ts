@@ -26,7 +26,9 @@ jest.doMock("@nuintun/qrcode", () => {
 
 import { Decoder } from "@nuintun/qrcode"
 import * as settings from "settings"
-import { getDisplayName, getValidationMessageSetting } from "../../settings/ui"
+import { getDisplayName } from "../../common/formatTokens"
+import type { TotpConfig } from "../../common/TotpConfig"
+import { getValidationMessageSetting } from "../../settings/ui"
 import * as i18nUtils from "../i18nUtils"
 import {
   addTokenFromQrTag,
@@ -35,7 +37,6 @@ import {
   getErrorMessageForDuplicateToken,
   getMatchingExistingToken,
   TOKENS_SETTINGS_KEY,
-  TotpConfig,
   updateDisplayName,
   validateNewManualToken
 } from "../tokens"

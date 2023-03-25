@@ -1,4 +1,5 @@
 import { settingsStorage } from "settings"
+import type { TotpConfig } from "../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../settings/ui"
 import {
   sendTokensToDevice,
@@ -8,7 +9,6 @@ import {
   addTokenFromQrTag,
   addTokenManually,
   TOKENS_SETTINGS_KEY,
-  TotpConfig,
   updateDisplayName,
   validateNewManualToken
 } from "./tokens"

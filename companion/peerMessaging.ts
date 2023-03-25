@@ -1,7 +1,8 @@
 import * as messaging from "messaging"
 import { settingsStorage } from "settings"
 import { PeerMessage } from "../common/PeerMessage"
-import { TOKENS_SETTINGS_KEY, TotpConfig } from "./tokens"
+import type { TotpConfig } from "../common/TotpConfig"
+import { TOKENS_SETTINGS_KEY } from "./tokens"
 
 export function sendTokensWhenDeviceIsReady() {
   messaging.peerSocket.addEventListener("open", () => {

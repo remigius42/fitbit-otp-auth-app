@@ -1,4 +1,4 @@
-import { TotpConfig } from "./tokens"
+import type { TotpConfig } from "../common/TotpConfig"
 
 /**
  * Parse a key URI into a TotpConfig

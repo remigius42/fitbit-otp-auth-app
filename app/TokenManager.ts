@@ -3,7 +3,7 @@ import type {
   UpdateTokensStartMessage,
   UpdateTokensTokenMessage
 } from "../common/PeerMessage"
-import type { TotpConfig } from "../companion/tokens"
+import type { TotpConfig } from "../common/TotpConfig"
 
 type TokenManagerObserver = () => void
 

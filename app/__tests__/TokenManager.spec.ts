@@ -1,4 +1,4 @@
-import { TotpConfig } from "../../companion/tokens"
+import type { TotpConfig } from "../../common/TotpConfig"
 import { TokenManager } from "../TokenManager"
 
 describe("TokenManager", () => {

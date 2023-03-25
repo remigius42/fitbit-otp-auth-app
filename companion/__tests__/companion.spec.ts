@@ -8,6 +8,7 @@ import { messagingMockFactory } from "../__mocks__/messaging"
 jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
 import * as settings from "settings"
+import type { TotpConfig } from "../../common/TotpConfig"
 import { UPDATE_DISPLAY_NAME_SETTINGS_KEY } from "../../settings/ui"
 import { initialize } from "../companion"
 import * as peerMessaging from "../peerMessaging"
@@ -93,7 +94,7 @@ describe("companion", () => {
     })
 
     describe("adds settings change listener which", () => {
-      const SOME_TOKEN: tokens.TotpConfig = {
+      const SOME_TOKEN: TotpConfig = {
         label: "some label",
         issuer: "some issuer",
         secret: "some secret",

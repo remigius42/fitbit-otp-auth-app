@@ -1,7 +1,7 @@
 /* spell-checker:ignore MJUXILTMPEXTEWRWMNFEITY */
 
+import type { TotpConfig } from "../../common/TotpConfig"
 import { totpConfigFromUri } from "../keyUri"
-import { TotpConfig } from "../tokens"
 
 describe("keyUri", () => {
   describe("totpConfigFromUri", () => {

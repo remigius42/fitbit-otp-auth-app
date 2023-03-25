@@ -9,7 +9,7 @@ jest.doMock("messaging", messagingMockFactory, { virtual: true })
 
 import * as messaging from "messaging"
 import { PeerMessage } from "../../common/PeerMessage"
-import type { TotpConfig } from "../../companion/tokens"
+import type { TotpConfig } from "../../common/TotpConfig"
 import { initialize } from "../app"
 import { TokenManager } from "../TokenManager"
 import * as ui from "../ui"

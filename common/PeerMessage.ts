@@ -1,4 +1,4 @@
-import { TotpConfig } from "../companion/tokens"
+import type { TotpConfig } from "./TotpConfig"
 
 export interface UpdateTokensStartMessage {
   type: "UPDATE_TOKENS_START_MESSAGE"

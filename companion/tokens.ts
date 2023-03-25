@@ -1,10 +1,12 @@
 /* spell-checker:ignore nuintun qrcode */
 
-import base32decode from "base32-decode"
 import { Decoder } from "@nuintun/qrcode"
+import base32decode from "base32-decode"
 import { gettext } from "i18n"
 import { settingsStorage } from "settings"
-import { getDisplayName, getValidationMessageSetting } from "../settings/ui"
+import { getDisplayName } from "../common/formatTokens"
+import type { TotpConfig } from "../common/TotpConfig"
+import { getValidationMessageSetting } from "../settings/ui"
 import { gettextWithReplacement } from "./i18nUtils"
 import { totpConfigFromUri } from "./keyUri"
 import {
@@ -23,6 +25,8 @@ import {
 } from "./ui/validation"
 
 export const TOKENS_SETTINGS_KEY = "tokens"
+
+type TotpConfigInput = Omit<TotpConfig, "displayName">
 
 export async function addTokenFromQrTag(imageUri: string) {
   settingsStorage.removeItem(
@@ -230,17 +234,4 @@ function validateConfig(config: TotpConfigInput) {
     )
   }
   return validationErrors
-}
-
-interface TotpConfigInput {
-  label: string
-  issuer?: string
-  secret: string
-  algorithm: string
-  digits: string
-  period: string
-}
-
-export interface TotpConfig extends TotpConfigInput {
-  displayName?: string
 }
