@@ -13,6 +13,7 @@ import {
   RETRIEVING_TOKENS_ID,
   TOKENS_VIEW_PATH
 } from "../ids"
+import { TokenManager } from "../../TokenManager"
 
 describe("ui", () => {
   beforeAll(() => jest.useFakeTimers())
@@ -70,8 +71,9 @@ describe("ui", () => {
   describe("showTokens", () => {
     it("replaces with the correct view", async () => {
       const documentMock = jest.mocked(document)
+      const dummyTokenManager = new TokenManager()
 
-      await showTokens()
+      await showTokens(dummyTokenManager)
 
       expect(documentMock.location.pathname).toBe(TOKENS_VIEW_PATH)
     })

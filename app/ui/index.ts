@@ -1,4 +1,5 @@
 import document from "document"
+import { TokenManager } from "../TokenManager"
 import {
   ADD_TOKENS_VIEW_PATH,
   INDEX_VIEW_PATH,
@@ -6,6 +7,7 @@ import {
   RETRIEVING_TOKENS_ID,
   TOKENS_VIEW_PATH
 } from "./ids"
+import { setupTokenList } from "./tokens"
 
 export function registerDelayedMessageWhetherDeviceIsConnected() {
   setTimeout(() => {
@@ -26,6 +28,7 @@ export async function showNoTokensAvailableMessage() {
   await document.location.replace(ADD_TOKENS_VIEW_PATH)
 }
 
-export async function showTokens() {
+export async function showTokens(tokenManager: TokenManager) {
   await document.location.replace(TOKENS_VIEW_PATH)
+  setupTokenList(tokenManager)
 }

@@ -1,7 +1,8 @@
 import {
   INDEX_VIEW_PATH,
   RETRIEVING_TOKENS_CONNECTION_ISSUE_ID,
-  RETRIEVING_TOKENS_ID
+  RETRIEVING_TOKENS_ID,
+  TOKEN_LIST_ID
 } from "../ui/ids"
 
 export const documentMockFactory = () => {
@@ -33,6 +34,11 @@ const documentMock: DocumentMock = {
     [RETRIEVING_TOKENS_CONNECTION_ISSUE_ID]: {
       style: {
         display: "none"
+      }
+    },
+    [TOKEN_LIST_ID]: {
+      style: {
+        display: "inline"
       }
     }
   },

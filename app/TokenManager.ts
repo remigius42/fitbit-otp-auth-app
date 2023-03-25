@@ -5,7 +5,7 @@ import type {
 } from "../common/PeerMessage"
 import type { TotpConfig } from "../common/TotpConfig"
 
-type TokenManagerObserver = () => void
+type TokenManagerObserver = (tokenManager: TokenManager) => void
 
 export class TokenManager {
   private readonly tokens: Array<TotpConfig> = []
@@ -55,7 +55,7 @@ export class TokenManager {
   }
 
   private notifyObservers() {
-    this.observers.forEach(observer => observer())
+    this.observers.forEach(observer => observer(this))
   }
 }
 

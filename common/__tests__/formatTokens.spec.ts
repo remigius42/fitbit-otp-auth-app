@@ -1,4 +1,4 @@
-import { getDisplayName } from "../formatTokens"
+import { formatTotp, getDisplayName } from "../formatTokens"
 import type { TotpConfig } from "../TotpConfig"
 
 describe("formatTokens", () => {
@@ -69,6 +69,24 @@ describe("formatTokens", () => {
       const displayName = getDisplayName(SOME_TOTP_CONFIG_WITHOUT_ISSUER)
 
       expect(displayName).toBe(SOME_TOTP_CONFIG_WITHOUT_ISSUER.label)
+    })
+  })
+
+  describe("formatTotp", () => {
+    it("adds only one character", () => {
+      const SOME_STRING = "some string"
+
+      const formatted = formatTotp(SOME_STRING)
+
+      expect(formatted.length).toBe(SOME_STRING.length + 1)
+    })
+
+    it("adds a space in the middle", () => {
+      const SOME_STRING = "123456"
+
+      const formatted = formatTotp(SOME_STRING)
+
+      expect(formatted.charAt(formatted.length / 2)).toBe(" ")
     })
   })
 })

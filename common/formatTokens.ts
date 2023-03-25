@@ -17,3 +17,11 @@ export function getDisplayName(
     return formatLabelAndIssuer(label, issuer)
   }
 }
+
+export function formatTotp(totp: string) {
+  const halfTotpLength = totp.length / 2
+  return `${totp.substring(0, halfTotpLength)} ${totp.substring(
+    halfTotpLength,
+    totp.length
+  )}`
+}

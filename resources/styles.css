@@ -9,3 +9,29 @@
 #retrieving-tokens-connection-issue {
   display: none;
 }
+
+.token-list-item {
+  height: 90;
+  display: none;
+}
+
+.token-list-item > text {
+  text-anchor: middle;
+  x: 50%;
+}
+
+.token-list-item > .totp {
+  font-size: 42;
+}
+
+.token-list-item > .display-name {
+  font-size: 21;
+}
+
+.token-list-item > .progress-background {
+  fill: #704d00;
+}
+
+.token-list-item > .token-separator {
+  fill: #704d00;
+}

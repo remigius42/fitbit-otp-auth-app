@@ -23,9 +23,9 @@ function registerPeerSocketListener() {
   })
 }
 
-function tokensAvailableObserver() {
+function tokensAvailableObserver(tokenManager: TokenManager) {
   if (tokenManager.getTokens().length > 0) {
-    void showTokens()
+    void showTokens(tokenManager)
   } else {
     void showNoTokensAvailableMessage()
   }
