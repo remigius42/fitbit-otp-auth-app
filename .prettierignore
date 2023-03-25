@@ -1,0 +1,3 @@
+# NPM - prevent Git history noise when `npm` and `prettier` format against each other
+package.json
+package-lock.json
