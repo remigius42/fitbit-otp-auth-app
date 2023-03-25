@@ -24,6 +24,8 @@ describe("peerMessaging", () => {
         return SOME_JSON_STRINGIFIED_TOKENS
       } else if (key === SettingsButton.compensateClockDrift) {
         return "true"
+      } else if (key === SettingsButton.storeTokensOnDevice) {
+        return "false"
       }
     })
   })
@@ -76,6 +78,8 @@ describe("peerMessaging", () => {
           return undefined
         } else if (key === SettingsButton.compensateClockDrift) {
           return "true"
+        } else if (key === SettingsButton.storeTokensOnDevice) {
+          return "false"
         }
       })
 
@@ -167,6 +171,8 @@ describe("peerMessaging", () => {
           return SOME_JSON_STRINGIFIED_TOKENS
         } else if (key === SettingsButton.compensateClockDrift) {
           return "false"
+        } else if (key === SettingsButton.storeTokensOnDevice) {
+          return "false"
         }
       })
 
@@ -182,6 +188,53 @@ describe("peerMessaging", () => {
         count: expect.any(Number) as number
       })
       jest.useRealTimers()
+    })
+
+    it("instructs device to store tokens if store tokens on device is enabled", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(key => {
+        if (key === TOKENS_SETTINGS_KEY) {
+          return SOME_JSON_STRINGIFIED_TOKENS
+        } else if (key === SettingsButton.storeTokensOnDevice) {
+          return "true"
+        } else if (key === SettingsButton.compensateClockDrift) {
+          return "true"
+        }
+      })
+
+      sendTokensToDevice(SOME_TOKENS)
+
+      expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: SOME_TOKENS.length,
+        secondsSinceEpochInCompanion: expect.any(Number) as number,
+        storeTokensOnDevice: true
+      })
+    })
+
+    it("does not instruct device to store tokens if store tokens on device is disabled", () => {
+      const peerSocketMock = jest.mocked(messaging).peerSocket
+      ;(peerSocketMock as unknown as PeerSocketMock).openSocket()
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(key => {
+        if (key === TOKENS_SETTINGS_KEY) {
+          return SOME_JSON_STRINGIFIED_TOKENS
+        } else if (key === SettingsButton.storeTokensOnDevice) {
+          return "false"
+        } else if (key === SettingsButton.compensateClockDrift) {
+          return "true"
+        }
+      })
+
+      sendTokensToDevice(SOME_TOKENS)
+
+      expect(peerSocketMock.send).toHaveBeenNthCalledWith(1, {
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: SOME_TOKENS.length,
+        secondsSinceEpochInCompanion: expect.any(Number) as number
+      })
     })
 
     it("sends the tokens with update token messages", () => {

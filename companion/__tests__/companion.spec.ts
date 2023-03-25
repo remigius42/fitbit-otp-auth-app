@@ -327,6 +327,22 @@ describe("companion", () => {
         expect(sendTokensToDeviceSpy).toBeCalled()
       })
 
+      it("sends tokens to device to update token storage if the setting is changed", () => {
+        const settingsStorageMock = setupSettingsStorageMock(
+          SettingsButton.storeTokensOnDevice,
+          "false"
+        )
+        const sendTokensToDeviceSpy = jest.spyOn(
+          peerMessaging,
+          "sendTokensToDevice"
+        )
+        void initialize()
+
+        settingsStorageMock.setItem(SettingsButton.storeTokensOnDevice, "true")
+
+        expect(sendTokensToDeviceSpy).toBeCalled()
+      })
+
       function setupSettingsStorageMock(
         eventKey: string,
         newValue = '"some new value JSON"'
@@ -361,6 +377,8 @@ describe("companion", () => {
                     return JSON.stringify([SOME_TOKEN])
                   } else if (getKey === SettingsButton.compensateClockDrift) {
                     return "true"
+                  } else if (getKey === SettingsButton.storeTokensOnDevice) {
+                    return "false"
                   }
                 })
                 if (key === eventKey) {

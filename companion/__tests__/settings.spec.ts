@@ -5,7 +5,8 @@ import * as settings from "settings"
 
 import {
   fallbackToDefaultSettings,
-  isCompensatingClockDrift
+  isCompensatingClockDrift,
+  isStoringTokensOnDevice
 } from "../settings"
 import { SettingsButton } from "../ui/SettingsButton"
 
@@ -22,6 +23,18 @@ describe("settings", () => {
       expect(settingsStorageMock.setItem).toBeCalledWith(
         SettingsButton.compensateClockDrift,
         "true"
+      )
+    })
+
+    it("does not store tokens on the device by default to increase security", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(() => null)
+
+      fallbackToDefaultSettings()
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        SettingsButton.storeTokensOnDevice,
+        "false"
       )
     })
   })
@@ -43,6 +56,26 @@ describe("settings", () => {
       )
 
       expect(isCompensatingClockDrift()).toBe(false)
+    })
+  })
+
+  describe("isStoringTokensOnDevice", () => {
+    it("returns true if tokens are to be stored on the device", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation((key: string) =>
+        key === SettingsButton.storeTokensOnDevice ? "true" : null
+      )
+
+      expect(isStoringTokensOnDevice()).toBe(true)
+    })
+
+    it("returns false if tokens are not to be stored on the device", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation((key: string) =>
+        key === SettingsButton.storeTokensOnDevice ? "false" : null
+      )
+
+      expect(isStoringTokensOnDevice()).toBe(false)
     })
   })
 })

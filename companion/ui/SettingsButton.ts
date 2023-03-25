@@ -1,3 +1,4 @@
 export enum SettingsButton {
-  compensateClockDrift = "compensateClockDrift"
+  compensateClockDrift = "compensateClockDrift",
+  storeTokensOnDevice = "storeTokensOnDevice"
 }

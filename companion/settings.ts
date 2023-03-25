@@ -10,11 +10,21 @@ export function fallbackToDefaultSettings() {
   if (settingsStorage.getItem(SettingsButton.compensateClockDrift) === null) {
     settingsStorage.setItem(SettingsButton.compensateClockDrift, "true")
   }
+  if (settingsStorage.getItem(SettingsButton.storeTokensOnDevice) === null) {
+    settingsStorage.setItem(SettingsButton.storeTokensOnDevice, "false")
+  }
 }
 
 export function isCompensatingClockDrift() {
   return (
     JSON.parse(settingsStorage.getItem(SettingsButton.compensateClockDrift)) ===
+    true
+  )
+}
+
+export function isStoringTokensOnDevice() {
+  return (
+    JSON.parse(settingsStorage.getItem(SettingsButton.storeTokensOnDevice)) ===
     true
   )
 }

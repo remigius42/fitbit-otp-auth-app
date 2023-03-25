@@ -55,6 +55,9 @@ msgstr "Select token algorithm"
 msgid "Settings"
 msgstr "Settings"
 
+msgid "Store tokens on device"
+msgstr "Store tokens on smartwatch"
+
 msgid "Third-party licenses"
 msgstr "Third-party licenses"
 

@@ -1,5 +1,9 @@
-/* spellchecker:ignore MJUXILTMPEXTEWRWMNFEITY */
+/* spellchecker:ignore MJUXILTMPEXTEWRWMNFEITY, cbor */
 
+import { fsMockFactory } from "../__mocks__/fs"
+jest.doMock("fs", fsMockFactory, { virtual: true })
+
+import * as fs from "fs"
 import type { TotpConfig } from "../../common/TotpConfig"
 import { TokenManager } from "../TokenManager"
 import * as totp from "../totp"
@@ -16,6 +20,14 @@ describe("TokenManager", () => {
     ...SOME_TOKEN,
     label: "some other label"
   }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    const fsMock = jest.mocked(fs)
+    fsMock.existsSync.mockImplementation((filename: string) =>
+      filename === TokenManager.TOKENS_CBOR_PATH ? true : false
+    )
+  })
 
   describe("handleUpdateTokensMessage", () => {
     it("updates the tokens if the update sequence is valid", () => {
@@ -153,6 +165,97 @@ describe("TokenManager", () => {
 
       expect(tokenManager.getClockDrift()).toBe(0)
       jest.useRealTimers()
+    })
+
+    it("stores the tokens if the update sequence is valid and storing tokens on the device is enabled", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      const ENABLE_STORE_ON_DEVICE = true
+      const tokenManager = new TokenManager()
+      const fsMock = jest.mocked(fs)
+
+      addTokensToTokenManager(
+        tokenManager,
+        [SOME_TOKEN, SOME_OTHER_TOKEN],
+        SOME_SECONDS_SINCE_EPOCH,
+        ENABLE_STORE_ON_DEVICE
+      )
+
+      expect(fsMock.writeFileSync).toBeCalledWith(
+        TokenManager.TOKENS_CBOR_PATH,
+        tokenManager.getTokens(),
+        "cbor"
+      )
+    })
+
+    it("does not store the tokens if the update sequence is invalid, even if setting is enabled", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      const tokenManager = new TokenManager()
+      const fsMock = jest.mocked(fs)
+
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 1, // corrupt update sequence by setting expected tokens to 1 while providing none.
+        secondsSinceEpochInCompanion: SOME_SECONDS_SINCE_EPOCH,
+        storeTokensOnDevice: true
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(fsMock.writeFileSync).not.toBeCalled()
+    })
+
+    it("deletes the tokens on the device when the setting is disabled", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      const IS_STORING_TOKENS = false
+      const tokenManager = new TokenManager()
+      const fsMock = jest.mocked(fs)
+
+      addTokensToTokenManager(
+        tokenManager,
+        [SOME_TOKEN, SOME_OTHER_TOKEN],
+        SOME_SECONDS_SINCE_EPOCH,
+        IS_STORING_TOKENS
+      )
+
+      expect(fsMock.unlinkSync).toBeCalledWith(TokenManager.TOKENS_CBOR_PATH)
+    })
+
+    it("ignores the update sequence validity when instructed to delete the tokens on the device", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      const tokenManager = new TokenManager()
+      const fsMock = jest.mocked(fs)
+
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_START_MESSAGE",
+        count: 1, // corrupt update sequence by setting expected tokens to 1 while providing none.
+        secondsSinceEpochInCompanion: SOME_SECONDS_SINCE_EPOCH
+        // for security reasons, the tokens are only stored on the device when explicitly instructed to, therefore omitting `storeTokensOnDevice` triggers a deletion like `storeTokensOnDevice: false` would
+      })
+      tokenManager.handleUpdateTokensMessage({
+        type: "UPDATE_TOKENS_END_MESSAGE"
+      })
+
+      expect(fsMock.unlinkSync).toBeCalled()
+    })
+
+    it("does not try to delete the tokens on the device if the file does not exist", () => {
+      const SOME_SECONDS_SINCE_EPOCH = 42
+      const IS_STORING_TOKENS = false
+      const tokenManager = new TokenManager()
+      const fsMock = jest.mocked(fs)
+      fsMock.existsSync.mockImplementation((filename: string) =>
+        filename === TokenManager.TOKENS_CBOR_PATH ? false : true
+      )
+
+      addTokensToTokenManager(
+        tokenManager,
+        [SOME_TOKEN, SOME_OTHER_TOKEN],
+        SOME_SECONDS_SINCE_EPOCH,
+        IS_STORING_TOKENS
+      )
+
+      expect(fsMock.unlinkSync).not.toBeCalled()
     })
   })
 
@@ -451,12 +554,14 @@ describe("TokenManager", () => {
   function addTokensToTokenManager(
     tokenManager: TokenManager,
     tokens: Array<TotpConfig>,
-    secondsSinceEpochInCompanion?: number
+    secondsSinceEpochInCompanion?: number,
+    storeTokensOnDevice?: boolean
   ) {
     tokenManager.handleUpdateTokensMessage({
       type: "UPDATE_TOKENS_START_MESSAGE",
       count: tokens.length,
-      secondsSinceEpochInCompanion
+      secondsSinceEpochInCompanion,
+      storeTokensOnDevice
     })
 
     tokens.forEach((token, index) =>

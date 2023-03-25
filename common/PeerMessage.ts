@@ -6,6 +6,8 @@ export interface UpdateTokensStartMessage {
   count: number
   /** Optional seconds since epoch in companion. Used to compensate clock drift on the device. */
   secondsSinceEpochInCompanion?: number
+  /** Optionally store tokens on device */
+  storeTokensOnDevice?: boolean
 }
 
 export interface UpdateTokensTokenMessage {

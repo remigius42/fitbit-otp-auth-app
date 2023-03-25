@@ -1,3 +1,6 @@
+/* spellchecker:ignore cbor */
+
+import * as fs from "fs"
 import type {
   UpdateTokensMessage,
   UpdateTokensStartMessage,
@@ -13,6 +16,7 @@ export class TokenManager {
   private readonly updateTokensBuffer = new UpdateTokensBuffer()
   private readonly observers: Array<TokenManagerObserver> = []
   private readonly passwordCache = new TokenPasswordCache()
+  public static readonly TOKENS_CBOR_PATH = "tokens.cbor"
 
   handleUpdateTokensMessage(message: UpdateTokensMessage) {
     switch (message.type) {
@@ -30,6 +34,12 @@ export class TokenManager {
           this.passwordCache.setClockDrift(
             this.updateTokensBuffer.getClockDrift()
           )
+          if (this.updateTokensBuffer.shouldStoreTokens()) {
+            this.storeTokensOnDevice()
+          }
+        }
+        if (!this.updateTokensBuffer.shouldStoreTokens()) {
+          this.deleteTokensOnDevice()
         }
         break
       /* istanbul ignore next: this is only the compile time exhaustiveness check (see https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking) */
@@ -70,6 +80,16 @@ export class TokenManager {
   private notifyObservers() {
     this.observers.forEach(observer => observer(this))
   }
+
+  private storeTokensOnDevice() {
+    fs.writeFileSync(TokenManager.TOKENS_CBOR_PATH, this.tokens, "cbor")
+  }
+
+  private deleteTokensOnDevice() {
+    if (fs.existsSync(TokenManager.TOKENS_CBOR_PATH)) {
+      fs.unlinkSync(TokenManager.TOKENS_CBOR_PATH)
+    }
+  }
 }
 
 class UpdateTokensBuffer {
@@ -78,10 +98,12 @@ class UpdateTokensBuffer {
   private updateSuccessful = false
   private hasUpdateStarted = false
   private clockDrift = 0
+  private storeTokensOnDevice = false
 
   handleStartMessage({
     count,
-    secondsSinceEpochInCompanion
+    secondsSinceEpochInCompanion,
+    storeTokensOnDevice = false
   }: UpdateTokensStartMessage) {
     this.expectedCount = count
     this.tokens.length = 0
@@ -90,6 +112,7 @@ class UpdateTokensBuffer {
     this.clockDrift = secondsSinceEpochInCompanion
       ? secondsSinceEpochInCompanion - Date.now() / 1000
       : 0
+    this.storeTokensOnDevice = storeTokensOnDevice
   }
 
   handleTokenMessage(message: UpdateTokensTokenMessage) {
@@ -135,11 +158,16 @@ received before still pending "token messages" can disrupt an update. */
     return this.clockDrift
   }
 
+  shouldStoreTokens() {
+    return this.storeTokensOnDevice
+  }
+
   private abortUpdate() {
     this.updateSuccessful = false
     this.hasUpdateStarted = false
     this.tokens.length = 0
     this.clockDrift = 0
+    this.storeTokensOnDevice = false
   }
 }
 

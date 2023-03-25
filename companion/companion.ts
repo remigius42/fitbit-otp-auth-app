@@ -63,6 +63,8 @@ function addSettingsChangeListener() {
       sendTokensToDevice(tokens)
     } else if (key === SettingsButton.compensateClockDrift) {
       sendCurrentTokensToDevice()
+    } else if (key === SettingsButton.storeTokensOnDevice) {
+      sendCurrentTokensToDevice()
     }
   })
 }

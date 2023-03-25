@@ -14,6 +14,11 @@ export default function SectionSettings() {
         settingsKey={SettingsButton.compensateClockDrift}
         label={gettext("Compensate clock drift")}
       />
+
+      <Toggle
+        settingsKey={SettingsButton.storeTokensOnDevice}
+        label={gettext("Store tokens on device")}
+      />
     </Section>
   )
 }
