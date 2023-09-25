@@ -1,5 +1,14 @@
-#
+# spellchecker:words commonmarker
+# spellchecker:ignore GHSA, pxvg
 
-# Rails issue flagged due to /docs/Gemfile.lock, not relevant for generated documentation
-# see https://discuss.rubyonrails.org/t/cve-2023-28120-possible-xss-security-vulnerability-in-safebuffer-bytesplice/82469
+# Rails issues flagged due to /docs/Gemfile.lock, not relevant for generated documentation
+## see https://discuss.rubyonrails.org/t/cve-2023-28120-possible-xss-security-vulnerability-in-safebuffer-bytesplice/82469
 CVE-2023-28120
+## File Disclosure of Locally Encrypted Files, see https://avd.aquasec.com/nvd/cve-2023-38037
+CVE-2023-38037
+## Commonmarker vulnerable to to several quadratic complexity bugs, see https://github.com/advisories/GHSA-48wp-p9qv-4j64
+GHSA-48wp-p9qv-4j64
+## Several quadratic complexity bugs may lead to denial of service in Commonmarker, see https://github.com/advisories/GHSA-7vh7-fw88-wj87
+GHSA-7vh7-fw88-wj87
+## Update packaged libxml2 to v2.10.4 to resolve multiple CVEs, see https://github.com/advisories/GHSA-pxvg-2qj5-37jq
+GHSA-pxvg-2qj5-37jq
