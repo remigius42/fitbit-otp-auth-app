@@ -1,4 +1,5 @@
 import { settingsStorage } from "settings"
+import { ColorSchemeName } from "../common/ColorSchemes"
 import { NEW_TOKEN_DEFAULT_VALUES } from "./ui/NewTokenFieldName"
 import { SettingsButton } from "./ui/SettingsButton"
 
@@ -16,6 +17,12 @@ export function fallbackToDefaultSettings() {
   }
   if (settingsStorage.getItem(SettingsButton.showEnlargedTokensView) === null) {
     settingsStorage.setItem(SettingsButton.showEnlargedTokensView, "false")
+  }
+  if (settingsStorage.getItem(SettingsButton.colorScheme) === null) {
+    settingsStorage.setItem(
+      SettingsButton.colorScheme,
+      JSON.stringify(ColorSchemeName.default)
+    )
   }
 }
 

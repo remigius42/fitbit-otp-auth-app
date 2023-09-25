@@ -14,6 +14,7 @@ import {
   NEW_TOKEN_DEFAULT_VALUES
 } from "../ui/NewTokenFieldName"
 import { SettingsButton } from "../ui/SettingsButton"
+import { ColorSchemeName } from "../../common/ColorSchemes"
 
 describe("settings", () => {
   beforeEach(() => jest.resetAllMocks())
@@ -52,6 +53,18 @@ describe("settings", () => {
       expect(settingsStorageMock.setItem).toBeCalledWith(
         SettingsButton.showEnlargedTokensView,
         "false"
+      )
+    })
+
+    it("uses default color scheme", () => {
+      const settingsStorageMock = jest.mocked(settings).settingsStorage
+      settingsStorageMock.getItem.mockImplementation(() => null)
+
+      fallbackToDefaultSettings()
+
+      expect(settingsStorageMock.setItem).toBeCalledWith(
+        SettingsButton.colorScheme,
+        JSON.stringify(ColorSchemeName.default)
       )
     })
   })
