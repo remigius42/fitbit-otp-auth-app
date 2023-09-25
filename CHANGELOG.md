@@ -28,3 +28,9 @@
 - show missing tokens message initially in app ([d5d09e4](https://github.com/remigius42/fitbit-otp-auth-app/commit/d5d09e4a24f79e1aae376197e9beaddaa2d05999))
 - update progress indicators once per second ([609adc7](https://github.com/remigius42/fitbit-otp-auth-app/commit/609adc789ec68c77fe2a149c1731e80e57474477))
 - update TOTPs within the token list on device ([d8f0417](https://github.com/remigius42/fitbit-otp-auth-app/commit/d8f0417364ac4fb8df5ef9e8b3921fb0cd8d7d64))
+
+## [1.0.1](https://github.com/remigius42/fitbit-otp-auth-app/compare/v1.0.0...v1.0.1) (2023-09-25)
+
+### Bug Fixes
+
+- set default color scheme at first start ([df06689](https://github.com/remigius42/fitbit-otp-auth-app/commit/df06689727af755f23f6fe0847614b995c9deee2))
